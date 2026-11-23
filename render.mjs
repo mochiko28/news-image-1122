@@ -99,23 +99,27 @@ function wrap(value, limit, style) {
   return lines;
 }
 
-function fit(value, limit, maxLines, style, label) {
+function fit(value, limit, maxLines, style, label, minimumSize = style.size - 4) {
   const initialSize = style.size;
-  for (let step = 0; step <= 16; step++) {
-    const candidate = Number((initialSize - step * 0.25).toFixed(2));
+  for (let step = 0; ; step++) {
+    const candidate = Math.max(minimumSize, Number((initialSize - step * 0.25).toFixed(2)));
     const adjusted = { ...style, size: candidate };
     const lines = wrap(value, limit, adjusted);
     if (lines.length <= maxLines && lines.every((row) => estimate(row, adjusted) <= limit)) {
       if (candidate < initialSize) shrinkLog.push(`${label}: ${initialSize} → ${candidate} px`);
       return { lines, style: adjusted };
     }
+    if (candidate === minimumSize) break;
   }
   throw new Error(`Text exceeds the space for ${label}: ${value}`);
 }
 
-function paragraph(x, y, value, limit, maxLines, leading, style, label) {
-  const fitted = fit(value, limit, maxLines, style, label);
-  return fitted.lines.map((row, index) => text(x, y + index * leading, row, fitted.style)).join('');
+function linesOfText(x, y, { lines, style }, leading) {
+  return lines.map((row, index) => text(x, y + index * leading, row, style)).join('');
+}
+
+function paragraph(x, y, value, limit, maxLines, leading, style, label, minimumSize) {
+  return linesOfText(x, y, fit(value, limit, maxLines, style, label, minimumSize), leading);
 }
 
 const regionColors = {
@@ -123,8 +127,8 @@ const regionColors = {
   Americas: '#68456d', Oceania: '#23636e', World: '#4d5363',
 };
 const storyRegions = [
-  'Middle East', 'Europe', 'Middle East', 'Europe', 'Americas', 'Oceania', 'Asia',
-  'Africa', 'Africa', 'Asia', 'Africa', 'Middle East', 'Asia',
+  'Middle East', 'Europe', 'Middle East', 'Europe', 'Asia', 'Africa', 'Africa',
+  'Middle East', 'Africa', 'Middle East', 'Asia', 'Americas', 'Oceania',
 ];
 
 const statuses = {
@@ -208,6 +212,27 @@ const illustrations = {
       + path('M98 73H111V80H94ZM144 37L155 42L142 67L132 62Z', '#8eaa9d')
       + [85, 111, 165, 186].map((x) => circle(x, 95, 7, '#233235') + circle(x, 95, 2.5, '#869688')).join('');
   },
+  tanker() {
+    const sea = '#4d6e78';
+    const hull = '#29394b';
+    const foam = '#a8bcb2';
+    return band(324, 110, '#b99386') + rect(0, 0, 324, 110, 'url(#stipple)')
+      + circle(265, 44, 18, '#ecd1a5')
+      + path('M0 64L24 59L45 61L69 55L94 58L123 64H324V72H0Z', '#8e7d81')
+      + path('M109 58C108 49 115 44 112 36C109 25 122 16 138 17C149 17 154 12 168 13C183 14 187 8 205 10C199 19 190 23 177 25C162 29 160 36 143 37C129 39 125 46 123 58Z', '#484352')
+      + path('M119 52C120 38 130 33 146 32C162 31 169 24 183 23C173 29 169 34 156 36C137 39 132 48 129 57Z', '#70606a')
+      + rect(0, 66, 324, 44, sea)
+      + path('M8 73H51M255 73H315M17 86H44M6 100H108M129 104H201M247 103H309M284 83H322', 'none', outline(foam, 1.2))
+      + path('M66 79H247L277 83L244 95H70L45 91Z', '#3d5667')
+      + path('M59 72H229L252 64H269L247 86H79Q67 84 59 72Z', hull, outline('#d2b49e'))
+      + path('M66 79H254L247 86H79Z', '#905449')
+      + path('M82 72V55H108V49H119V63H127V72Z', '#e3d4b2', outline(hull))
+      + path('M84 55V49H106V55M94 49V40M88 42H101M86 59H104M87 65H100', 'none', outline(hull, 2))
+      + path('M131 71V65H155V71M165 71V65H189V71M199 71V65H223V71M137 67H216', 'none', outline('#e0be96', 2))
+      + path('M275 94Q282 90 290 94T305 94', 'none', outline(foam, 1.2))
+      + path('M281 94A6 6 0 0 1 293 94Z', hull, outline('#c4b49b'))
+      + path('M287 88V85M282 90L280 88M292 90L294 88', 'none', outline(hull, 1.5));
+  },
   tennis() {
     const chalk = '#e9e4c5';
     return band(192, 58, '#527b70') + path('M11 49L33 9H150L178 49Z', '#355866', outline(chalk, 1.4))
@@ -280,10 +305,60 @@ const illustrations = {
       + path('M62 6L88 1L93 23L67 28Z', '#f0e6c9', outline('#526b67'))
       + path('M70 13L76 17L84 8', 'none', outline('#526b67', 2));
   },
+  mine() {
+    const earth = '#a87c5f';
+    const dark = '#514743';
+    return band(192, 58, '#d7bb93') + circle(119, 13, 10, '#eed5a5')
+      + path('M0 34L23 25L48 29L67 24L105 33L138 24L168 30L192 26V58H0Z', '#bb9772')
+      + path('M0 40L55 35L94 40L140 34L192 38V58H0Z', earth)
+      + path('M0 51L28 47L58 50M11 39H31M123 50L139 48M145 39L167 37', 'none', outline('#d0ab7e', 1.5))
+      + path('M49 29L46 52', 'none', outline(dark, 4))
+      + path('M48 6L70 35H26Z', '#ebd5ad', outline('#8c3c26', 3))
+      + path('M41 24A7 6 0 0 1 55 24Q55 27 52 28V31H44V28Q41 27 41 24Z', dark)
+      + circle(45, 24, 1.45, '#ebd5ad') + circle(51, 24, 1.45, '#ebd5ad')
+      + group(ellipse(101, 48, 23, 6, '#86684f')
+        + path('M83 46Q86 38 101 38T119 46V49Q100 53 83 48Z', '#4f554e', outline(dark))
+        + ellipse(101, 43, 14, 3.6, '#768071')
+        + path('M76 51L84 47L94 49L106 48L116 51L126 49V58H76Z', earth), 'translate(-17 0)')
+      + path('M18 55L17 49L13 46M17 52L22 47M71 52L70 46L66 43M70 49L74 45', 'none', outline('#71593f', 1.2));
+  },
+  health() {
+    const canvas = '#e6d9b9';
+    const seam = '#536a61';
+    return band(192, 58, '#95aaa0')
+      + path('M0 25L24 15L45 23L60 18L83 25L106 17L138 27L162 21L192 28V58H0Z', '#789184')
+      + path('M0 43L81 37L143 43L192 40V58H0Z', '#718474')
+      + path('M32 58L74 41L93 40L69 58Z', '#bca88b')
+      + path('M19 43L48 14H90L110 43Z', canvas, outline(seam, 1.4))
+      + path('M48 14L75 43H19Z', '#f1e6cc', outline(seam, 1.4))
+      + path('M48 28L60 43H36Z', '#5c7468')
+      + path('M82 25H88V30H93V36H88V41H82V36H77V30H82Z', '#a2473c')
+      + path('M115 52L116 41L113 46L110 44L115 33L120 31H126L131 33L137 43L134 46L129 41L130 53H125L123 45L120 53Z', '#314f51', outline(canvas, 1.2))
+      + circle(123, 26, 6, '#314f51', outline(canvas, 1.2))
+      + path('M119 26H127', 'none', outline('#a5bbb0', 2.4));
+  },
+  capitol() {
+    const stone = '#e5d7bc';
+    const shaded = '#a8a59d';
+    const trim = '#4b536b';
+    return band(192, 58, '#8d95a6') + circle(115, 16, 10, '#cbbaaa')
+      + path('M0 43H192V58H0Z', '#727d91')
+      + path('M15 49H118V53H15ZM21 34H112V49H21Z', stone, outline(trim))
+      + path('M46 31H87V37H46ZM49 31C50 21 56 15 64 14H69C77 15 83 21 84 31Z', stone, outline(trim, 1.4))
+      + path('M64 14V9H69V14M66.5 9V4M56 30Q57 20 64 15M77 30Q76 20 69 15', 'none', outline(trim, 1.2))
+      + path('M40 37L66.5 29L93 37Z', shaded, outline(trim))
+      + path('M30 49V39M42 49V39M54 49V39M66 49V39M78 49V39M90 49V39M102 49V39', 'none', outline(trim, 2.6))
+      + path('M119 40L126 34H146L153 40V51H119Z', '#4d636a', outline(stone))
+      + path('M127 22L142 19L146 35L131 38Z', '#f2e8cf', outline(trim))
+      + path('M131 28L135 31L141 24', 'none', outline('#40695a', 2.2))
+      + path('M119 40H153', 'none', outline(stone));
+  },
 };
 
-function artPanel(story, x, y, w, h) {
-  return element('svg', { x, y, width: w, height: h, viewBox: `0 0 ${w} ${h}`, overflow: 'hidden' }, illustrations[story.art]());
+function artPanel(story, x, y, w, artHeight, height = artHeight) {
+  return element('svg', {
+    x, y, width: w, height, viewBox: `0 0 ${w} ${artHeight}`, preserveAspectRatio: 'none', overflow: 'hidden',
+  }, illustrations[story.art]());
 }
 
 function masthead() {
@@ -298,19 +373,21 @@ function masthead() {
     + text(size / 2, 162, day.complete, { size: 11.4, bold: true, fill: light, tracking: 1.05, anchor: 'middle' });
 }
 
-function sectionTitle(x, y, label) {
-  return text(x, y, label, { size: 12.6, bold: true, tracking: 1.25, fill: red });
-}
+const sectionStyle = { size: 12.6, bold: true, tracking: 1.25, fill: red };
+const sectionTitle = (x, y, label) => text(x, y, label, sectionStyle);
 
 function timelineBand() {
+  const heading = 'THE DAY IN UTC (APPROX.)';
+  const ruleStart = margin + Math.ceil(estimate(heading, sectionStyle)) + 12;
   const colWidth = width / timeline.length;
-  return sectionTitle(margin, 185, 'THE DAY IN UTC') + line(145, 181, right, 181)
+  return sectionTitle(margin, 185, heading) + line(ruleStart, 181, right, 181)
     + timeline.map(({ t, text: description }, index) => {
       const x = margin + index * colWidth;
       const inset = index === 0 ? 0 : 9;
+      const limit = colWidth - inset - 6;
       return (index === 0 ? '' : line(x, 193, x, 228))
-        + text(x + inset, 204, t, { size: 13.1, bold: true })
-        + paragraph(x + inset, 217, description, colWidth - inset - 6, 2, 11.1,
+        + paragraph(x + inset, 204, t, limit, 1, 0, { size: 13.1, bold: true }, `timeline label ${t}`)
+        + paragraph(x + inset, 217, description, limit, 2, 11.1,
           { size: 11.5 }, `timeline ${t}`);
     }).join('');
 }
@@ -323,7 +400,8 @@ function heroCard(story, index) {
   const inset = 9;
   const contents = w - 2 * inset;
   const left = x + inset;
-  const badge = { size: 11.2, bold: true, tracking: 0.8, fill: light };
+  const badge = fit(story.badge, contents - 15, 1,
+    { size: 11.2, bold: true, tracking: 0.8, fill: light }, `${story.id} badge`).style;
   return rect(x + 0.5, y + 0.5, w - 1, h - 1, '#faf6ed', outline(rule))
     + artPanel(story, x, y, w, 110)
     + rect(left, y + 8, Math.ceil(estimate(story.badge, badge) + 15), 19, red)
@@ -340,24 +418,26 @@ function heroCard(story, index) {
 
 function gridCard(story, index) {
   const w = 192;
-  const h = 131;
+  const h = 135;
+  const artHeight = 53;
   const x = margin + (index % 5) * 201;
-  const y = 478 + Math.floor(index / 5) * 137;
+  const y = 476 + Math.floor(index / 5) * 141;
   const left = x + 7;
   const contents = w - 14;
-  const tagStyle = { size: 10.4, bold: true, tracking: 0.65, fill: light, anchor: 'end' };
+  const tagStyle = fit(story.tag, w - 24, 1,
+    { size: 10.4, bold: true, tracking: 0.65, fill: light, anchor: 'end' }, `${story.id} tag`).style;
   const tagWidth = Math.ceil(estimate(story.tag, tagStyle) + 12);
   return rect(x + 0.5, y + 0.5, w - 1, h - 1, '#faf6ed', outline(rule))
-    + artPanel(story, x, y, w, 58)
+    + artPanel(story, x, y, w, 58, artHeight)
     + statusPill(x + w - 5, y + 4, story.status, true)
-    + rect(x + w - tagWidth, y + 42, tagWidth, 16, ink)
-    + text(x + w - 6, y + 53.5, story.tag, tagStyle)
-    + storyLabel(left, y + 69, story, contents)
-    + paragraph(left, y + 89, story.head, contents - 2, 2, 15.6,
-      { font: serif, bold: true, size: 16.1 }, `${story.id} headline`)
-    + paragraph(left, y + 117, story.body, contents - 2, 1, 0,
+    + rect(x + w - tagWidth, y + artHeight - 16, tagWidth, 16, ink)
+    + text(x + w - 6, y + artHeight - 4.5, story.tag, tagStyle)
+    + storyLabel(left, y + 64, story, contents)
+    + paragraph(left, y + 83, story.head, contents - 2, 2, 15.6,
+      { font: serif, bold: true, size: 16.1 }, `${story.id} headline`, 14)
+    + paragraph(left, y + 110.5, story.body, contents - 2, 2, 11,
       { size: 11.2 }, `${story.id} body`)
-    + paragraph(left, y + 127.2, story.src, contents, 1, 0,
+    + paragraph(left, y + 131.8, story.src, contents, 1, 0,
       { size: 9.2, italic: true, fill: muted }, `${story.id} source`);
 }
 
@@ -370,7 +450,7 @@ function numbersBand() {
     + numbers.map(({ n, label }, index) => {
       const column = index % 2;
       const left = x + column * cellWidth;
-      const baseline = y + 48 + Math.floor(index / 2) * 45;
+      const baseline = y + 43 + Math.floor(index / 2) * 45;
       return text(left, baseline, n, { size: 26, bold: true, font: serif })
         + paragraph(left, baseline + 12.5, label, cellWidth, 2, 11.5,
           { size: 11.6 }, `number ${n} label`);
@@ -379,27 +459,31 @@ function numbersBand() {
 
 function briefsBand() {
   const left = 254;
-  const columns = 2;
   const gap = 12;
-  const colWidth = (right - left - gap) / columns;
-  const divider = left + colWidth + gap / 2;
-  const columnLength = Math.ceil(also.length / columns);
+  const divider = left + 400;
+  const columnLength = Math.ceil(also.length / 2);
+  const columns = [also.slice(0, columnLength), also.slice(columnLength)];
+  const leading = 12.8;
   return sectionTitle(left, 773, 'ALSO ON SUNDAY 22 NOVEMBER')
     + line(left, 779, right, 779)
     + line(divider, 785, divider, 918)
-    + also.map(({ region, text: description }, index) => {
-      const id = heroes.length + grid.length + index + 1;
-      const column = Math.floor(index / columnLength);
-      const x = left + column * (colWidth + gap);
-      const y = 794 + (index % columnLength) * 13.45;
-      const prefix = `${region} ·`;
-      const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
-      const regionX = x + 20;
-      const bodyX = regionX + Math.ceil(estimate(prefix, regionStyle)) + 3;
-      const bodyRight = column === 0 ? divider - 1 : right - 2;
-      return text(x + 13, y, id, { size: 10.5, bold: true, anchor: 'end', fill: muted })
-        + text(regionX, y, prefix, regionStyle)
-        + paragraph(bodyX, y, description, bodyRight - bodyX, 1, 0, { size: 11.5 }, `brief ${id}`);
+    + columns.map((entries, column) => {
+      const x = column === 0 ? left : divider + gap / 2;
+      const bodyRight = column === 0 ? divider - gap / 2 : right;
+      let y = 793.5;
+      return entries.map(({ region, text: description }, index) => {
+        const id = heroes.length + grid.length + column * columnLength + index + 1;
+        const prefix = `${region} ·`;
+        const regionStyle = { size: 12.2, bold: true, fill: regionColors[region] };
+        const regionX = x + 20;
+        const bodyX = regionX + Math.ceil(estimate(prefix, regionStyle)) + 3;
+        const fitted = fit(description, bodyRight - bodyX - 2, 2, { size: 12.2 }, `brief ${id}`, 12);
+        const entry = text(x + 14, y, id, { size: 12, bold: true, anchor: 'end', fill: muted })
+          + text(regionX, y, prefix, regionStyle)
+          + linesOfText(bodyX, y, fitted, leading);
+        y += 15.6 + (fitted.lines.length - 1) * leading;
+        return entry;
+      }).join('');
     }).join('');
 }
 
@@ -413,12 +497,12 @@ function footer() {
     return text(legendX, legendBaseline, status, style)
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
-  return rect(margin + 0.5, 923.5, width - 1, 29, 'none', outline(red))
-    + text(margin + 9, 941.5, 'DATE CHECK', { size: 11, fill: red, bold: true, tracking: 0.75 })
-    + paragraph(margin + 93, 935.5, dateCheck, width - 102, 2, 11.1, { size: 11.1 }, 'date check')
-    + rect(margin, 955, width, 41, '#ede8dc', outline(rule, 0.65))
-    + paragraph(margin + noteInset, 972, judgeNote, width - 2 * noteInset, 2, 13.5, noteStyle, 'judge note')
-    + paragraph(margin, 1005, sources, width, 1, 0, { size: 9.2, italic: true, fill: muted }, 'sources')
+  return rect(margin + 0.5, 923.5, width - 1, 39, 'none', outline(red))
+    + text(margin + 9, 946, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
+    + paragraph(margin + 101, 934.5, dateCheck, width - 110, 3, 12, { size: 11.5 }, 'date check', 11)
+    + rect(margin, 965, width, 32, '#ede8dc', outline(rule, 0.65))
+    + paragraph(margin + noteInset, 977, judgeNote, width - 2 * noteInset, 2, 13.5, noteStyle, 'judge note')
+    + paragraph(margin, 1006, sources, width, 1, 0, { size: 9.2, italic: true, fill: muted }, 'sources')
     + legend;
 }
 
