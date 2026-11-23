@@ -10,7 +10,7 @@ export const day = {
   tally: '39 STORIES · 6 REGIONS · ALL FROM THIS SUNDAY',
   deck: 'COP31 ends with no climate pact · Russian strikes kill 15 around Kyiv · Trump weighs new Iran strikes · Alcaraz wins in Turin',
   complete: 'COMPLETE DAY · DATED BY UTC: 00:00–24:00 UTC ON 22 NOV · CHECKED AFTER THE DAY ENDED',
-  utcRule: 'Dated by UTC: a story counts if it happened between 00:00 and 24:00 UTC on 22 November. Las Vegas (04:00–05:30 UTC) and San Antonio (01:00–03:15 UTC) were Saturday night locally but Sunday in UTC.',
+  utcRule: 'Dated by UTC, 00:00–24:00 on 22 Nov: Las Vegas (04:00–05:30) and San Antonio (01:00–03:15) were Sat night locally, Sunday in UTC.',
 };
 
 // Order of the region strip. Counts are computed from heroes/grid 'area' and also 'region'.
@@ -113,10 +113,26 @@ export const also = [
   { region: 'Oceania', text: 'Australia: Marles says US budget office "wrong" on AUKUS' },
 ];
 
-export const dateCheck = 'Not Sunday news in UTC, so not shown as such: Peru\'s Junín quake (00:09 UTC Sat), BepiColombo\'s orbit burn (18:24 UTC Sat), the Claude "Riemann proof" claim (Fri), ' +
-  'the FBI crime-database hack (Fri), Nvidia\'s SEC probe (Fri), Estonia\'s border closures (Fri), the Sparta II drone strike (Sat), the Kryvyi Rih strike (Fri), ' +
-  '"El Chapo Isidro" captured (Fri–Sat), Geneva robot-weapons talks end (Fri–Sat), Meta India protests (Fri), Bolsonaro into intensive care (Sat), Iran\'s Bahrain claim (Sat; denied Sun), ' +
-  'the Banten fire (began Sat), the Bayelsa capsize (Fri). Belgium\'s air strike is on Monday. COP31: the 00:00 UTC draft was rejected; no pact was adopted.';
+// Earlier (or later) than Sunday 22 November in UTC, so not shown as Sunday news. 'when' is shown in red.
+export const dateCheck = [
+  { item: 'Peru: Junín earthquake', when: 'Sat 00:09 UTC' },
+  { item: 'BepiColombo orbit burn', when: 'Sat 18:24 UTC' },
+  { item: "Iran's Bahrain claim", when: 'Sat; denied Sun' },
+  { item: 'Sparta II drone strike', when: 'Sat 21' },
+  { item: 'Bolsonaro into intensive care', when: 'Sat 21' },
+  { item: 'Banten candy-plant fire starts', when: 'Sat 21' },
+  { item: '"El Chapo Isidro" capture', when: 'Fri–Sat' },
+  { item: 'Geneva robot-weapons talks end', when: 'Fri–Sat' },
+  { item: 'Bayelsa funeral-boat capsize', when: 'Fri 20' },
+  { item: 'Kryvyi Rih missile strike', when: 'Fri 20' },
+  { item: 'Claude "Riemann proof" claim', when: 'Fri 20' },
+  { item: 'FBI crime-database hack', when: 'Fri 20' },
+  { item: 'Nvidia SEC probe', when: 'Fri 20' },
+  { item: 'Estonia closes border points', when: 'Fri 20' },
+  { item: 'Meta protests in India', when: 'Fri 20' },
+  { item: 'Belgian air-traffic strike', when: 'Mon 23' },
+];
+export const dateCheckFoot = 'COP31: the 00:00 UTC Sunday draft was rejected; the talks ended Sunday afternoon with no pact.';
 
 export const judgeNote = 'Note for the judge: this page was compiled after 22 November had ended and checked story by story. ' +
   'Every story is dated by UTC; earlier events are named in the date check, not shown as Sunday news. It shows how Sunday finished: ' +

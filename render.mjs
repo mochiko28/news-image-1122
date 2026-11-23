@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { also, dateCheck, day, grid, heroes, judgeNote, numbers, regions, sources, timeline } from './stories.mjs';
+import { also, dateCheck, dateCheckFoot, day, grid, heroes, judgeNote, numbers, regions, sources, timeline } from './stories.mjs';
 
 const size = 1024;
 const margin = 14;
@@ -37,13 +37,13 @@ const path = (d, fill, extra = {}) => element('path', { d, fill, ...extra });
 const group = (content, transform) => element('g', transform ? { transform } : {}, content);
 const outline = (stroke, weight = 1) => ({ stroke, 'stroke-width': weight, 'stroke-linejoin': 'round' });
 
-function text(x, y, value, options = {}) {
+function text(x, y, value, options = {}, trailingSpan = '') {
   const { font = sans, size = 12, bold = false, weight = bold ? 700 : 400, italic = false,
     fill = ink, anchor = 'start', tracking = 0 } = options;
   return element('text', {
     x, y, fill, 'font-family': font, 'font-size': size, 'font-weight': weight,
     'font-style': italic ? 'italic' : 'normal', 'text-anchor': anchor, 'letter-spacing': tracking,
-  }, escape(value));
+  }, escape(value) + trailingSpan);
 }
 
 // Approximate glyph advances in ems, grouped by width for the two typefaces.
@@ -713,16 +713,54 @@ function briefsBand() {
     }).join('');
 }
 
-function footer() {
+function dateCheckBox() {
   const dateTextX = margin + 101;
   const dateTextWidth = right - dateTextX - 9;
   const utcRule = fit(day.utcRule, dateTextWidth, 2, { size: 11.25, bold: true }, 'UTC rule', 11);
-  const check = fit(dateCheck, dateTextWidth, 4, { size: 11 }, 'date check', 10.5);
   const utcBaseline = dateTop + 11.5;
   const dateLeading = 11.25;
-  const checkBaseline = utcBaseline + (utcRule.lines.length - 1) * dateLeading + 12;
-  const checkBottom = checkBaseline + (check.lines.length - 1) * dateLeading + check.style.size / 4;
-  assert(checkBottom <= dateTop + dateHeight - dateBorder / 2, 'Date check extends outside the box');
+  const lastUtcBaseline = utcBaseline + (utcRule.lines.length - 1) * dateLeading;
+  const rowOffsets = [12, 23.25, 34.5, 45.75];
+  const columns = 4;
+  const gridInset = 11.25;
+  const gutter = 11.5;
+  const gridWidth = width - 2 * gridInset;
+  const columnWidth = (gridWidth - (columns - 1) * gutter) / columns;
+  const itemStyle = { size: 10.75 };
+  const whenStyle = { ...itemStyle, bold: true, fill: red };
+  const footBaseline = lastUtcBaseline + rowOffsets.at(-1) + 11.5;
+  const foot = fit(dateCheckFoot, gridWidth, 1,
+    { size: 10.25, italic: true }, 'date-check footnote', 10);
+
+  // Containment in the box also keeps this text within the checked section bounds.
+  const assertDateBounds = (y, style, label) => {
+    assert(y - style.size >= dateCheckArea.top + dateBorder
+      && y + style.size / 4 <= dateCheckArea.bottom - dateBorder,
+    `${label} extends outside the date-check box`);
+  };
+  assert.equal(dateCheck.length, columns * rowOffsets.length, 'Date check must fill the grid');
+  const cells = dateCheck.map(({ item, when }, index) => {
+    const column = Math.floor(index / rowOffsets.length);
+    const row = index % rowOffsets.length;
+    const x = margin + gridInset + column * (columnWidth + gutter);
+    const y = lastUtcBaseline + rowOffsets[row];
+    const label = `date-check entry ${index + 1}`;
+    const prefix = `${item} `;
+    assert(estimate(prefix, itemStyle) + estimate(when, whenStyle) <= columnWidth,
+      `Text exceeds the space for ${label}: ${prefix}${when}`);
+    assertDateBounds(y, itemStyle, label);
+    const time = element('tspan', { fill: whenStyle.fill, 'font-weight': 700 }, escape(when));
+    return text(x, y, prefix, itemStyle, time);
+  }).join('');
+  assertDateBounds(footBaseline, foot.style, 'Date-check footnote');
+  return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red, dateBorder))
+    + text(margin + 9, utcBaseline, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
+    + linesOfText(dateTextX, utcBaseline, utcRule, dateLeading)
+    + cells
+    + linesOfText(margin + gridInset, footBaseline, foot, 0);
+}
+
+function footer() {
   const noteHeight = 24;
   const noteInset = 9;
   const noteStyle = { font: 'Adwaita Sans', size: 11, bold: true };
@@ -734,10 +772,7 @@ function footer() {
     return text(legendX, legendBaseline, status, style)
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
-  return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red, dateBorder))
-    + text(margin + 9, utcBaseline, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
-    + linesOfText(dateTextX, utcBaseline, utcRule, dateLeading)
-    + linesOfText(dateTextX, checkBaseline, check, dateLeading)
+  return dateCheckBox()
     + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, noteBorder))
     + paragraph(margin + noteInset, noteTop + 9.75, judgeNote, width - 2 * noteInset, 2, 11.25,
       noteStyle, 'judge note', 11)
