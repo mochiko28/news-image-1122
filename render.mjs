@@ -441,9 +441,20 @@ function gridCard(story, index) {
       { size: 9.2, italic: true, fill: muted }, `${story.id} source`);
 }
 
-const detailsTop = 756;
+const detailsTop = 754;
 const detailsBottom = 929;
 const numbersWidth = 164;
+const detailsHeadingOffset = 16;
+const detailsRuleOffset = 21;
+const dateTop = detailsBottom + 2.5;
+const dateHeight = 34;
+const dateBorder = 1;
+const noteTop = dateTop + dateHeight + 1.5;
+const noteBorder = 0.65;
+const footerAreas = [
+  { name: 'date-check box', top: dateTop - dateBorder / 2, bottom: dateTop + dateHeight + dateBorder / 2 },
+  { name: 'footer', top: noteTop - noteBorder / 2, bottom: size },
+];
 
 function numbersBand() {
   const inset = 8;
@@ -458,8 +469,8 @@ function numbersBand() {
   const rowsTop = y + 25;
   const rowHeight = (detailsBottom - rowsTop - 3) / numbers.length;
   return rect(margin, y, numbersWidth, detailsBottom - y, '#eee7d8')
-    + text(x, y + 17, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
-    + line(x, y + 23, contentRight, y + 23)
+    + text(x, y + detailsHeadingOffset, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
+    + line(x, y + detailsRuleOffset, contentRight, y + detailsRuleOffset)
     + numbers.map(({ n, label }, index) => {
       const center = rowsTop + (index + 0.5) * rowHeight;
       const fitted = fit(label, contentRight - labelX, 2, labelStyle, `number ${n} label`, 11);
@@ -476,14 +487,23 @@ function briefsBand() {
   const divider = left + columnWidth + gap / 2;
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
-  return sectionTitle(left, detailsTop + 17, 'ALSO ON SUNDAY 22 NOVEMBER')
-    + line(left, detailsTop + 23, right, detailsTop + 23)
+  const firstBaseline = detailsTop + 32.75;
+  const leading = 11.625;
+  const bodyStyle = { size: 11.75 };
+  return sectionTitle(left, detailsTop + detailsHeadingOffset, 'ALSO ON SUNDAY 22 NOVEMBER')
+    + line(left, detailsTop + detailsRuleOffset, right, detailsTop + detailsRuleOffset)
     + line(divider, detailsTop + 29, divider, detailsBottom)
     + columns.map((entries, column) => {
       const x = left + column * (columnWidth + gap);
       return entries.map(({ region, text: description }, index) => {
         const id = heroes.length + grid.length + column * columnLength + index + 1;
-        const y = detailsTop + 34.5 + index * 12.25;
+        const y = firstBaseline + index * leading;
+        // The footer areas span the list, so check the line's ascent and descent against each one.
+        for (const { name, top, bottom } of footerAreas) {
+          if (y - bodyStyle.size < bottom && y + bodyStyle.size / 4 > top) {
+            throw new Error(`Brief ${id} overlaps the ${name}`);
+          }
+        }
         const prefix = `${region} ·`;
         const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
         const regionX = x + 18;
@@ -491,15 +511,12 @@ function briefsBand() {
         return text(x + 14, y, id, { size: 11.5, bold: true, anchor: 'end', fill: muted })
           + text(regionX, y, prefix, regionStyle)
           + paragraph(bodyX, y, description, x + columnWidth - bodyX - 2, 1, 0,
-            { size: 12 }, `brief ${id}`, 11.5);
+            bodyStyle, `brief ${id}`, 11.5);
       }).join('');
     }).join('');
 }
 
 function footer() {
-  const dateTop = detailsBottom + 2.5;
-  const dateHeight = 34;
-  const noteTop = dateTop + dateHeight + 1.5;
   const noteHeight = 26;
   const noteInset = 9;
   const noteStyle = { font: 'Adwaita Sans', size: 11.5, bold: true };
@@ -511,11 +528,11 @@ function footer() {
     return text(legendX, legendBaseline, status, style)
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
-  return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red))
+  return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red, dateBorder))
     + text(margin + 9, dateTop + 20.5, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
     + paragraph(margin + 101, dateTop + 10, dateCheck, width - 110, 3, 10.5,
       { size: 10.75 }, 'date check', 10.5)
-    + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, 0.65))
+    + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, noteBorder))
     + paragraph(margin + noteInset, noteTop + 10.5, judgeNote, width - 2 * noteInset, 2, 12,
       noteStyle, 'judge note', 11)
     + paragraph(margin, sourcesBaseline, sources, width, 1, 0,
