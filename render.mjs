@@ -523,9 +523,9 @@ function heroCard(story, index) {
       { size: 10.5, italic: true, fill: muted }, `${story.id} source`);
 }
 
-const gridTop = heroTop + heroHeight + 4;
+const gridTop = heroTop + heroHeight + 3;
 const gridHeight = 135;
-const gridRowStep = gridHeight + 6;
+const gridRowStep = gridHeight + 4;
 
 function gridCard(story, index) {
   const w = 192;
@@ -551,13 +551,13 @@ function gridCard(story, index) {
       { size: 9.2, italic: true, fill: muted }, `${story.id} source`);
 }
 
-const detailsTop = gridTop + gridRowStep + gridHeight + 4;
-const detailsBottom = 916.5;
+const detailsTop = gridTop + gridRowStep + gridHeight + 2;
+const detailsBottom = 902.5;
 const mapWidth = 164;
 const detailsHeadingOffset = 13;
 const detailsRuleOffset = 17;
 const dateTop = detailsBottom + 0.75;
-const dateHeight = 56.25;
+const dateHeight = 72.75;
 const dateBorder = 1;
 const noteTop = dateTop + dateHeight + 1.25;
 const noteBorder = 0.65;
@@ -674,8 +674,8 @@ function worldMap() {
     + text(left, mapArea.top + 15, 'WHERE IT HAPPENED', { ...sectionStyle, size: 11.25, tracking: 0.95, fill: light })
     + line(left, mapArea.top + 21, right, mapArea.top + 21, '#55647a', 0.75)
     + graticule + continents + leaders + markers
-    + line(left, mapArea.bottom - 31, right, mapArea.bottom - 31, '#55647a', 0.75)
-    + text(left, mapArea.bottom - 14, 'pins = story numbers', { size: 11, fill: '#e3d8ba' });
+    + line(left, mapArea.bottom - 24, right, mapArea.bottom - 24, '#55647a', 0.75)
+    + text(left, mapArea.bottom - 9, 'pins = story numbers', { size: 11, fill: '#e3d8ba' });
 }
 
 function briefsBand() {
@@ -685,9 +685,9 @@ function briefsBand() {
   const divider = left + columnWidth + gap / 2;
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
-  const firstBaseline = detailsTop + 28.5;
-  const leading = 11.2;
-  const bodyStyle = { size: 11.5 };
+  const firstBaseline = detailsTop + 26;
+  const leading = 10.7;
+  const bodyStyle = { size: 11 };
   return sectionTitle(left, detailsTop + detailsHeadingOffset, 'ALSO ON SUNDAY 22 NOVEMBER')
     + line(left, detailsTop + detailsRuleOffset, right, detailsTop + detailsRuleOffset)
     + line(divider, firstBaseline - bodyStyle.size + 3, divider, detailsBottom)
@@ -702,13 +702,13 @@ function briefsBand() {
           assertNoOverlap(brief, area);
         }
         const prefix = `${region} ·`;
-        const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
+        const regionStyle = { ...bodyStyle, bold: true, fill: regionColors[region] };
         const regionX = x + 18;
         const bodyX = regionX + Math.ceil(estimate(prefix, regionStyle)) + 3;
-        return text(x + 14, y, id, { size: 11.5, bold: true, anchor: 'end', fill: muted })
+        return text(x + 14, y, id, { ...bodyStyle, bold: true, anchor: 'end', fill: muted })
           + text(regionX, y, prefix, regionStyle)
           + paragraph(bodyX, y, description, x + columnWidth - bodyX - 2, 1, 0,
-            bodyStyle, `brief ${id}`, 11);
+            bodyStyle, `brief ${id}`, bodyStyle.size);
       }).join('');
     }).join('');
 }
@@ -717,14 +717,17 @@ function footer() {
   const dateTextX = margin + 101;
   const dateTextWidth = right - dateTextX - 9;
   const utcRule = fit(day.utcRule, dateTextWidth, 2, { size: 11.25, bold: true }, 'UTC rule', 11);
-  const utcBaseline = dateTop + 10;
-  const utcLeading = 11;
-  const checkBaseline = utcBaseline + (utcRule.lines.length - 1) * utcLeading + 10.5;
+  const check = fit(dateCheck, dateTextWidth, 4, { size: 11 }, 'date check', 10.5);
+  const utcBaseline = dateTop + 11.5;
+  const dateLeading = 11.25;
+  const checkBaseline = utcBaseline + (utcRule.lines.length - 1) * dateLeading + 12;
+  const checkBottom = checkBaseline + (check.lines.length - 1) * dateLeading + check.style.size / 4;
+  assert(checkBottom <= dateTop + dateHeight - dateBorder / 2, 'Date check extends outside the box');
   const noteHeight = 24;
   const noteInset = 9;
   const noteStyle = { font: 'Adwaita Sans', size: 11, bold: true };
-  const sourcesBaseline = noteTop + noteHeight + 8;
-  const legendBaseline = sourcesBaseline + 10;
+  const sourcesBaseline = noteTop + noteHeight + 7.75;
+  const legendBaseline = sourcesBaseline + 9.5;
   const legend = Object.entries(statuses).map(([status, { ink: color, meaning }], index) => {
     const legendX = margin + index * (width / 4);
     const style = { size: 8.9, bold: true, fill: color, tracking: 0.45 };
@@ -733,9 +736,8 @@ function footer() {
   }).join('');
   return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red, dateBorder))
     + text(margin + 9, utcBaseline, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
-    + linesOfText(dateTextX, utcBaseline, utcRule, utcLeading)
-    + paragraph(dateTextX, checkBaseline, dateCheck, dateTextWidth, 3, 10.5,
-      { size: 10.5 }, 'date check', 10.5)
+    + linesOfText(dateTextX, utcBaseline, utcRule, dateLeading)
+    + linesOfText(dateTextX, checkBaseline, check, dateLeading)
     + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, noteBorder))
     + paragraph(margin + noteInset, noteTop + 9.75, judgeNote, width - 2 * noteInset, 2, 11.25,
       noteStyle, 'judge note', 11)

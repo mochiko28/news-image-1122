@@ -24,7 +24,7 @@ export const timeline = [
   { t: '~04:00', text: 'Russian corvette sinks at Benghazi' },
   { t: '~05:30', text: 'Verstappen wins in Las Vegas' },
   { t: '~11:00', text: 'Pope lunches with 1,300 poor' },
-  { t: 'Midday', text: 'COP31 ends with no deal' },
+  { t: 'Afternoon', text: 'COP31 ends with no deal' },
   { t: '~19:00', text: 'Alcaraz wins in Turin' },
 ];
 
@@ -90,6 +90,7 @@ export const also = [
   { region: 'Middle East', text: 'West Bank: settlers torch homes and cars near Ramallah' },
   { region: 'Europe', text: 'Poland says Russia twice plotted to kill a Ukrainian rapper' },
   { region: 'Europe', text: 'MotoGP: Marc Márquez clinches his 8th premier-class title' },
+  { region: 'Europe', text: 'ESA: BepiColombo confirmed in Mercury orbit; burn cut short' },
   { region: 'Europe', text: 'Russia tows drone-hit Sparta II out of Finnish waters' },
   { region: 'Middle East', text: 'Bahrain denies Iran\'s claim it hit US Patriot radars' },
   { region: 'Middle East', text: 'Saudi-led coalition downs Houthi missile and drone' },
@@ -98,14 +99,13 @@ export const also = [
   { region: 'Africa', text: 'Kenya and DR Congo restore full ties at Oyo summit' },
   { region: 'Asia', text: 'S. Korea: KEPCO breach exposes 1.52m people' },
   { region: 'Asia', text: 'China cuts stock margin rule to 80% after AI sell-off' },
-  { region: 'Asia', text: 'S. Korea readies $8bn fund to steady markets after AI sell-off' },
   { region: 'Asia', text: 'Golf: Jeeno Thitikul wins a third straight CME title' },
   { region: 'Asia', text: 'Indonesia: 24 bodies, 32 missing after candy-plant fire' },
   { region: 'Asia', text: 'India: crash in Rajasthan kills 9 of one family' },
   { region: 'Asia', text: 'Bangladesh: garment workers block highway over pay' },
   { region: 'Asia', text: 'Taiwan: HK film "We Are Born Good" wins top Golden Horse' },
   { region: 'Americas', text: 'NBA: Wembanyama scores 50 as Spurs beat Pelicans 114-91' },
-  { region: 'Americas', text: 'NFL in Mexico City: 49ers 35, Vikings 10' },
+  { region: 'Americas', text: 'Peru: Junín quake toll put at 1 dead, 15 hurt' },
   { region: 'Americas', text: 'US: Delta system glitch delays 1,000+ flights' },
   { region: 'Americas', text: 'US: SpaceX launches NROL-136 spy satellites' },
   { region: 'Oceania', text: 'Cricket: India declare on a record 720/9; NZ 119/2' },
@@ -113,12 +113,13 @@ export const also = [
   { region: 'Oceania', text: 'Australia: Marles says US budget office "wrong" on AUKUS' },
 ];
 
-export const dateCheck = 'Left out on purpose, as they happened before Sunday in UTC: the Kryvyi Rih missile strike (Fri), Mexico\'s capture of "El Chapo Isidro" (Fri–Sat), ' +
-  'the end of the Geneva killer-robot talks (Fri–Sat), protests at Meta\'s India offices (Fri), Bolsonaro\'s move to intensive care (Sat; still there Sunday). ' +
-  'Shown only through their Sunday news: Iran\'s Bahrain claim (Sat; denied Sunday), the Banten fire (began Sat), the Bayelsa boat capsize (Fri).';
+export const dateCheck = 'Not Sunday news in UTC, so not shown as such: Peru\'s Junín quake (00:09 UTC Sat), BepiColombo\'s orbit burn (18:24 UTC Sat), the Claude "Riemann proof" claim (Fri), ' +
+  'the FBI crime-database hack (Fri), Nvidia\'s SEC probe (Fri), Estonia\'s border closures (Fri), the Sparta II drone strike (Sat), the Kryvyi Rih strike (Fri), ' +
+  '"El Chapo Isidro" captured (Fri–Sat), Geneva robot-weapons talks end (Fri–Sat), Meta India protests (Fri), Bolsonaro into intensive care (Sat), Iran\'s Bahrain claim (Sat; denied Sun), ' +
+  'the Banten fire (began Sat), the Bayelsa capsize (Fri). Belgium\'s air strike is on Monday. COP31: the 00:00 UTC draft was rejected; no pact was adopted.';
 
 export const judgeNote = 'Note for the judge: this page was compiled after 22 November had ended and checked story by story. ' +
   'Every story is dated by UTC; earlier events are named in the date check, not shown as Sunday news. It shows how Sunday finished: ' +
   'COP31 ended with no deal and Alcaraz won in Turin.';
 
-export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU), Xinhua, France 24, Formula1.com, ESPN, detikNews · drawings made in code';
+export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU), Xinhua, France 24, Formula1.com, ESPN, detikNews, ESA, INDECI · drawings made in code';
