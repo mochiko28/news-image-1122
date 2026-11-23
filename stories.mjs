@@ -9,7 +9,8 @@ export const day = {
   kicker: 'ONE DAY OF WORLD NEWS, ONE PICTURE',
   tally: '39 STORIES · 6 REGIONS · ALL FROM THIS SUNDAY',
   deck: 'COP31 ends with no climate pact · Russian strikes kill 15 around Kyiv · Trump weighs new Iran strikes · Alcaraz wins in Turin',
-  complete: 'COMPLETE DAY · 00:00–24:00 UTC · COMPILED AND CHECKED AFTER THE DAY ENDED',
+  complete: 'COMPLETE DAY · DATED BY UTC: 00:00–24:00 UTC ON 22 NOV · CHECKED AFTER THE DAY ENDED',
+  utcRule: 'Dated by UTC: a story counts if it happened between 00:00 and 24:00 UTC on 22 November. Las Vegas (04:00–05:30 UTC) and San Antonio (01:00–03:15 UTC) were Saturday night locally but Sunday in UTC.',
 };
 
 // Order of the region strip. Counts are computed from heroes/grid 'area' and also 'region'.
@@ -19,11 +20,11 @@ export const regions = ['Europe', 'Middle East', 'Africa', 'Asia', 'Americas', '
 export const timeline = [
   { t: 'Night', text: 'Drone brings down a block in Dymer' },
   { t: '~01:00', text: 'Drones hit Khartoum, Omdurman' },
-  { t: '01–10', text: 'Hong Kong committee polls' },
+  { t: '~03:15', text: 'Wembanyama ends on 50 points' },
   { t: '~04:00', text: 'Russian corvette sinks at Benghazi' },
+  { t: '~05:30', text: 'Verstappen wins in Las Vegas' },
   { t: '~11:00', text: 'Pope lunches with 1,300 poor' },
   { t: 'Midday', text: 'COP31 ends with no deal' },
-  { t: '12:23', text: 'SpaceX spy-satellite launch' },
   { t: '~19:00', text: 'Alcaraz wins in Turin' },
 ];
 
@@ -79,46 +80,45 @@ export const grid = [
     head: 'Hong Kong fills Election Committee seats', body: '856 candidates for 723 seats.', src: 'HK govt' },
   { id: 12, area: 'Americas', region: 'USA · POLITICS', status: 'CONFIRMED', art: 'capitol', tag: 'RECOUNT',
     head: 'Democrat Hubbard wins NC-5 after recount', body: 'Foxx concedes; Democrats near 258 seats.', src: 'AP, ABC News' },
-  { id: 13, area: 'Oceania', region: 'NEW ZEALAND · CRICKET', status: 'CONFIRMED', art: 'cricket', tag: '720/9',
-    head: 'India declare on a record 720/9', body: 'NZ reach 119/2 in Wellington.', src: 'Sunday Guardian, Dynamite News' },
+  { id: 13, area: 'Americas', region: 'USA · FORMULA 1', status: 'CONFIRMED', art: 'f1', tag: 'LAS VEGAS',
+    head: 'Verstappen wins the Las Vegas Grand Prix', body: 'Norris 2nd by 0.6s; Piastri 3rd. Ends 05:30 UTC.', src: 'Formula1.com, RaceFans' },
 ];
 
 export const also = [
   { region: 'Europe', text: 'Vatican: Pope Leo XIV lunches with 1,300 poor people' },
-  { region: 'Europe', text: 'Geneva: Gukesh v Sindarov world chess match opens' },
   { region: 'Europe', text: 'Football: Liverpool 4, Manchester United 0' },
   { region: 'Middle East', text: 'West Bank: settlers torch homes and cars near Ramallah' },
   { region: 'Europe', text: 'Poland says Russia twice plotted to kill a Ukrainian rapper' },
   { region: 'Europe', text: 'MotoGP: Marc Márquez clinches his 8th premier-class title' },
   { region: 'Europe', text: 'Russia tows drone-hit Sparta II out of Finnish waters' },
+  { region: 'Middle East', text: 'Bahrain denies Iran\'s claim it hit US Patriot radars' },
   { region: 'Middle East', text: 'Saudi-led coalition downs Houthi missile and drone' },
-  { region: 'Middle East', text: 'Syria destroys 400 million seized Captagon pills' },
   { region: 'Middle East', text: 'Israel: Likud–Yashar unity talks end without a deal' },
+  { region: 'Africa', text: 'Nigeria: Bayelsa funeral-boat toll rises to 29 (one report)' },
   { region: 'Africa', text: 'Kenya and DR Congo restore full ties at Oyo summit' },
   { region: 'Asia', text: 'S. Korea: KEPCO breach exposes 1.52m people' },
   { region: 'Asia', text: 'China cuts stock margin rule to 80% after AI sell-off' },
   { region: 'Asia', text: 'S. Korea readies $8bn fund to steady markets after AI sell-off' },
   { region: 'Asia', text: 'Golf: Jeeno Thitikul wins a third straight CME title' },
+  { region: 'Asia', text: 'Indonesia: 24 bodies, 32 missing after candy-plant fire' },
   { region: 'Asia', text: 'India: crash in Rajasthan kills 9 of one family' },
   { region: 'Asia', text: 'Bangladesh: garment workers block highway over pay' },
   { region: 'Asia', text: 'Taiwan: HK film "We Are Born Good" wins top Golden Horse' },
+  { region: 'Americas', text: 'NBA: Wembanyama scores 50 as Spurs beat Pelicans 114-91' },
   { region: 'Americas', text: 'NFL in Mexico City: 49ers 35, Vikings 10' },
-  { region: 'Americas', text: 'Brazil: storm toll rises to 5, about 250 hurt' },
-  { region: 'Americas', text: 'Colombia asks X to suspend ex-president Petro\'s account' },
   { region: 'Americas', text: 'US: Delta system glitch delays 1,000+ flights' },
-  { region: 'Americas', text: 'Trump hosts dinner for top $TRUMP coin holders' },
   { region: 'Americas', text: 'US: SpaceX launches NROL-136 spy satellites' },
+  { region: 'Oceania', text: 'Cricket: India declare on a record 720/9; NZ 119/2' },
   { region: 'Oceania', text: 'Australia: TV icon Molly Meldrum dies at 83 (late Sun UTC)' },
   { region: 'Oceania', text: 'Australia: Marles says US budget office "wrong" on AUKUS' },
 ];
 
-export const dateCheck = 'Left out on purpose, as they happened before Sunday: the Iranian strike on Bahrain (Sat), the Banten candy-factory fire (Sat), ' +
-  'the Nigeria funeral-boat capsize (Fri), Verstappen\'s Las Vegas win (Sat night, local), Wembanyama\'s 50 points (Sat, US), ' +
-  'the El Chapo Isidro capture (Fri–Sat), the Kryvyi Rih strike (Sat), Bolsonaro moved to intensive care (Sat), ' +
-  'the end of the Geneva killer-robot talks (Sat), protesters storming Meta\'s India offices (Fri).';
+export const dateCheck = 'Left out on purpose, as they happened before Sunday in UTC: the Kryvyi Rih missile strike (Fri), Mexico\'s capture of "El Chapo Isidro" (Fri–Sat), ' +
+  'the end of the Geneva killer-robot talks (Fri–Sat), protests at Meta\'s India offices (Fri), Bolsonaro\'s move to intensive care (Sat; still there Sunday). ' +
+  'Shown only through their Sunday news: Iran\'s Bahrain claim (Sat; denied Sunday), the Banten fire (began Sat), the Bayelsa boat capsize (Fri).';
 
 export const judgeNote = 'Note for the judge: this page was compiled after 22 November had ended and checked story by story. ' +
-  'Events from Friday or Saturday are named in the date check, not shown as Sunday news. It shows how Sunday finished: ' +
+  'Every story is dated by UTC; earlier events are named in the date check, not shown as Sunday news. It shows how Sunday finished: ' +
   'COP31 ended with no deal and Alcaraz won in Turin.';
 
-export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU), Xinhua, France 24 · drawings made in code';
+export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU), Xinhua, France 24, Formula1.com, ESPN, detikNews · drawings made in code';

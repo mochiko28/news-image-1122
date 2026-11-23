@@ -246,6 +246,30 @@ const illustrations = {
       + circle(62, 20, 6, '#f1cb66', outline('#fff0b1'))
       + path('M60 14Q57 19 63 25', 'none', outline('#fff0b1'));
   },
+  f1() {
+    const night = '#212942';
+    const tire = '#151c2c';
+    const gold = '#dcb783';
+    const checks = [[6, 0], [18, 0], [0, 6], [12, 6], [24, 6], [6, 12], [18, 12]];
+    return band(192, 58, night)
+      + path('M0 39V23H12V13H26V22H42V9H59V35H74V17H90V12H108V27H119V35H151V13H169V22H182V31H192V39Z', '#3b405a')
+      + path('M0 18H29M43 14H58M77 21H114M156 23H192', 'none', outline('#a27586', 2.4))
+      + path('M12 25H47M65 17H87M163 30H189', 'none', outline('#79a5a1', 2.4))
+      + path('M0 33H32M93 33H113M162 37H192', 'none', outline('#c3a277', 2))
+      + rect(0, 39, 192, 19, '#30374b')
+      + path('M0 46H17M5 54H26M72 54H119', 'none', outline('#796377', 2))
+      + group(path('M-9 21L0 -1', 'none', outline('#ded3bb', 2))
+        + rect(0, 0, 30, 18, '#ece4cd')
+        + checks.map(([x, y]) => rect(x, y, 6, 6, night)).join(''), 'translate(127 19.5) skewY(4)')
+      + group(ellipse(67, 50, 53, 3, tire)
+        + path('M19 25H34V29H27L32 36H39L51 28H65L72 35H83L95 39L109 40L112 44H119V48H91L82 44H49L42 47H27L24 39L21 29H17Z', gold, outline(tire, 1.2))
+        + path('M50 39H77L88 43H49Z', '#628b85')
+        + path('M61 34L66 30H84L87 33H77L74 37H68Z', tire)
+        + circle(73, 30, 4, '#e9d5b1', outline(tire))
+        + circle(37, 43, 9, tire, outline('#a69c99', 1.2))
+        + circle(100, 44, 8, tire, outline('#a69c99', 1.2))
+        + circle(37, 43, 3.7, '#929caa') + circle(100, 44, 3.3, '#929caa'), 'translate(-2 0) scale(.93 1)');
+  },
   flag() {
     const checks = Array.from({ length: 24 }, (_, index) => {
       const col = index % 8;
@@ -499,14 +523,14 @@ function gridCard(story, index) {
 }
 
 const detailsTop = gridTop + gridRowStep + gridHeight + 4;
-const detailsBottom = 929;
+const detailsBottom = 916.5;
 const numbersWidth = 164;
-const detailsHeadingOffset = 16;
-const detailsRuleOffset = 21;
-const dateTop = detailsBottom + 2.5;
-const dateHeight = 34;
+const detailsHeadingOffset = 13;
+const detailsRuleOffset = 17;
+const dateTop = detailsBottom + 0.75;
+const dateHeight = 56.25;
 const dateBorder = 1;
-const noteTop = dateTop + dateHeight + 1.5;
+const noteTop = dateTop + dateHeight + 1.25;
 const noteBorder = 0.65;
 const footerAreas = [
   { name: 'date-check box', top: dateTop - dateBorder / 2, bottom: dateTop + dateHeight + dateBorder / 2 },
@@ -521,9 +545,9 @@ function numbersBand() {
   const numberWidth = 58;
   const numberRight = x + numberWidth;
   const labelX = numberRight + 4;
-  const labelLeading = 11.75;
+  const labelLeading = 11.25;
   const labelStyle = { size: 11.5 };
-  const rowsTop = y + 25;
+  const rowsTop = y + 21;
   const rowHeight = (detailsBottom - rowsTop - 3) / numbers.length;
   return rect(margin, y, numbersWidth, detailsBottom - y, '#eee7d8')
     + text(x, y + detailsHeadingOffset, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
@@ -544,12 +568,12 @@ function briefsBand() {
   const divider = left + columnWidth + gap / 2;
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
-  const firstBaseline = detailsTop + 32.75;
-  const leading = 11.8;
-  const bodyStyle = { size: 11.75 };
+  const firstBaseline = detailsTop + 28.5;
+  const leading = 11.2;
+  const bodyStyle = { size: 11.5 };
   return sectionTitle(left, detailsTop + detailsHeadingOffset, 'ALSO ON SUNDAY 22 NOVEMBER')
     + line(left, detailsTop + detailsRuleOffset, right, detailsTop + detailsRuleOffset)
-    + line(divider, detailsTop + 29, divider, detailsBottom)
+    + line(divider, firstBaseline - bodyStyle.size + 3, divider, detailsBottom)
     + columns.map((entries, column) => {
       const x = left + column * (columnWidth + gap);
       return entries.map(({ region, text: description }, index) => {
@@ -568,17 +592,23 @@ function briefsBand() {
         return text(x + 14, y, id, { size: 11.5, bold: true, anchor: 'end', fill: muted })
           + text(regionX, y, prefix, regionStyle)
           + paragraph(bodyX, y, description, x + columnWidth - bodyX - 2, 1, 0,
-            bodyStyle, `brief ${id}`, 11.5);
+            bodyStyle, `brief ${id}`, 11);
       }).join('');
     }).join('');
 }
 
 function footer() {
-  const noteHeight = 26;
+  const dateTextX = margin + 101;
+  const dateTextWidth = right - dateTextX - 9;
+  const utcRule = fit(day.utcRule, dateTextWidth, 2, { size: 11.25, bold: true }, 'UTC rule', 11);
+  const utcBaseline = dateTop + 10;
+  const utcLeading = 11;
+  const checkBaseline = utcBaseline + (utcRule.lines.length - 1) * utcLeading + 10.5;
+  const noteHeight = 24;
   const noteInset = 9;
-  const noteStyle = { font: 'Adwaita Sans', size: 11.5, bold: true };
-  const sourcesBaseline = noteTop + noteHeight + 9.5;
-  const legendBaseline = sourcesBaseline + 13;
+  const noteStyle = { font: 'Adwaita Sans', size: 11, bold: true };
+  const sourcesBaseline = noteTop + noteHeight + 8;
+  const legendBaseline = sourcesBaseline + 10;
   const legend = Object.entries(statuses).map(([status, { ink: color, meaning }], index) => {
     const legendX = margin + index * (width / 4);
     const style = { size: 8.9, bold: true, fill: color, tracking: 0.45 };
@@ -586,11 +616,12 @@ function footer() {
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
   return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red, dateBorder))
-    + text(margin + 9, dateTop + 20.5, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
-    + paragraph(margin + 101, dateTop + 10, dateCheck, width - 110, 3, 10.5,
-      { size: 10.75 }, 'date check', 10.5)
+    + text(margin + 9, utcBaseline, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
+    + linesOfText(dateTextX, utcBaseline, utcRule, utcLeading)
+    + paragraph(dateTextX, checkBaseline, dateCheck, dateTextWidth, 3, 10.5,
+      { size: 10.5 }, 'date check', 10.5)
     + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, noteBorder))
-    + paragraph(margin + noteInset, noteTop + 10.5, judgeNote, width - 2 * noteInset, 2, 12,
+    + paragraph(margin + noteInset, noteTop + 9.75, judgeNote, width - 2 * noteInset, 2, 11.25,
       noteStyle, 'judge note', 11)
     + paragraph(margin, sourcesBaseline, sources, width, 1, 0,
       { size: 9.2, italic: true, fill: muted }, 'sources')
