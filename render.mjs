@@ -134,7 +134,7 @@ for (const region of storyAreas) {
   regionCounts[region]++;
 }
 const storyCount = Object.values(regionCounts).reduce((sum, count) => sum + count, 0);
-assert.equal(storyCount, 39, 'Region counts must add up to 39 stories');
+assert.equal(storyCount, Number.parseInt(day.tally, 10), `Region counts must add up to the tally (${day.tally})`);
 
 const statuses = {
   CONFIRMED: { fill: '#deeadc', ink: '#24583b', meaning: 'carried by 2+ outlets' },
@@ -685,9 +685,9 @@ function briefsBand() {
   const divider = left + columnWidth + gap / 2;
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
-  const firstBaseline = detailsTop + 26;
-  const leading = 10.7;
-  const bodyStyle = { size: 11 };
+  const firstBaseline = detailsTop + 27;
+  const leading = 12.6;
+  const bodyStyle = { size: 12 };
   return sectionTitle(left, detailsTop + detailsHeadingOffset, 'ALSO ON SUNDAY 22 NOVEMBER')
     + line(left, detailsTop + detailsRuleOffset, right, detailsTop + detailsRuleOffset)
     + line(divider, firstBaseline - bodyStyle.size + 3, divider, detailsBottom)
