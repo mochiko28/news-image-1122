@@ -24,12 +24,12 @@ export const timeline = [
 ];
 
 export const numbers = [
-  { n: '0', label: 'climate pacts adopted at COP31' },
+  { n: '0', label: 'climate deals from COP31' },
   { n: '15', label: 'killed in Russian strikes' },
   { n: '14 h', label: 'boy, 7, under rubble' },
-  { n: '5', label: 'children killed by a landmine' },
-  { n: '98.8%', label: 'turnout, Hong Kong polls' },
-  { n: '1.52m', label: 'people in KEPCO data breach' },
+  { n: '5', label: 'children killed by a mine' },
+  { n: '98.8%', label: 'turnout in Hong Kong polls' },
+  { n: '1.52m', label: 'people hit by KEPCO leak' },
 ];
 
 export const heroes = [

@@ -442,24 +442,30 @@ function gridCard(story, index) {
 }
 
 const detailsTop = 756;
-const detailsBottom = 940;
-const numbersWidth = 156;
+const detailsBottom = 929;
+const numbersWidth = 164;
 
 function numbersBand() {
   const inset = 8;
   const x = margin + inset;
   const y = detailsTop;
-  const cellWidth = (numbersWidth - 2 * inset) / 2;
+  const contentRight = margin + numbersWidth - inset;
+  const numberWidth = 58;
+  const numberRight = x + numberWidth;
+  const labelX = numberRight + 4;
+  const labelLeading = 11.75;
+  const labelStyle = { size: 11.5 };
+  const rowsTop = y + 25;
+  const rowHeight = (detailsBottom - rowsTop - 3) / numbers.length;
   return rect(margin, y, numbersWidth, detailsBottom - y, '#eee7d8')
     + text(x, y + 17, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
-    + line(x, y + 23, margin + numbersWidth - inset, y + 23)
+    + line(x, y + 23, contentRight, y + 23)
     + numbers.map(({ n, label }, index) => {
-      const column = index % 2;
-      const left = x + column * cellWidth;
-      const baseline = y + 43 + Math.floor(index / 2) * 52;
-      return text(left, baseline, n, { size: 23, bold: true, font: serif })
-        + paragraph(left, baseline + 11.25, label, cellWidth, 3, 11.5,
-          { size: 11.6 }, `number ${n} label`, 11.1);
+      const center = rowsTop + (index + 0.5) * rowHeight;
+      const fitted = fit(label, contentRight - labelX, 2, labelStyle, `number ${n} label`, 11);
+      const labelBaseline = center + 3.25 - (fitted.lines.length - 1) * labelLeading / 2;
+      return text(numberRight, center + 7.25, n, { size: 21, bold: true, font: serif, anchor: 'end' })
+        + linesOfText(labelX, labelBaseline, fitted, labelLeading);
     }).join('');
 }
 
@@ -477,7 +483,7 @@ function briefsBand() {
       const x = left + column * (columnWidth + gap);
       return entries.map(({ region, text: description }, index) => {
         const id = heroes.length + grid.length + column * columnLength + index + 1;
-        const y = detailsTop + 36.5 + index * 13;
+        const y = detailsTop + 34.5 + index * 12.25;
         const prefix = `${region} ·`;
         const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
         const regionX = x + 18;
@@ -491,22 +497,29 @@ function briefsBand() {
 }
 
 function footer() {
-  const legendBaseline = 1020;
+  const dateTop = detailsBottom + 2.5;
+  const dateHeight = 34;
+  const noteTop = dateTop + dateHeight + 1.5;
+  const noteHeight = 26;
   const noteInset = 9;
-  const noteStyle = { font: 'Adwaita Sans', size: 11.5, weight: 600, fill: ink };
+  const noteStyle = { font: 'Adwaita Sans', size: 11.5, bold: true };
+  const sourcesBaseline = noteTop + noteHeight + 9.5;
+  const legendBaseline = sourcesBaseline + 13;
   const legend = Object.entries(statuses).map(([status, { ink: color, meaning }], index) => {
     const legendX = margin + index * (width / 4);
     const style = { size: 8.9, bold: true, fill: color, tracking: 0.45 };
     return text(legendX, legendBaseline, status, style)
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
-  return rect(margin + 0.5, 942.5, width - 1, 34, 'none', outline(red))
-    + text(margin + 9, 963, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
-    + paragraph(margin + 101, 952.5, dateCheck, width - 110, 3, 10.5,
+  return rect(margin + 0.5, dateTop, width - 1, dateHeight, 'none', outline(red))
+    + text(margin + 9, dateTop + 20.5, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
+    + paragraph(margin + 101, dateTop + 10, dateCheck, width - 110, 3, 10.5,
       { size: 10.75 }, 'date check', 10.5)
-    + rect(margin, 978, width, 23, '#ede8dc', outline(rule, 0.65))
-    + paragraph(margin + noteInset, 987, judgeNote, width - 2 * noteInset, 2, 11.5, noteStyle, 'judge note')
-    + paragraph(margin, 1009, sources, width, 1, 0, { size: 9.2, italic: true, fill: muted }, 'sources')
+    + rect(margin, noteTop, width, noteHeight, '#ede8dc', outline(rule, 0.65))
+    + paragraph(margin + noteInset, noteTop + 10.5, judgeNote, width - 2 * noteInset, 2, 12,
+      noteStyle, 'judge note', 11)
+    + paragraph(margin, sourcesBaseline, sources, width, 1, 0,
+      { size: 9.2, italic: true, fill: muted }, 'sources')
     + legend;
 }
 
