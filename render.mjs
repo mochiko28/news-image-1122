@@ -390,23 +390,31 @@ function artPanel(story, x, y, w, artHeight, height = artHeight) {
   }, illustrations[story.art]());
 }
 
-const completeTop = 166;
+const deckBaseline = 130;
+const mastheadRuleY = 140.5;
+const numbersTop = 142;
+const numbersHeight = 40;
+const completeTop = 186;
 const completeHeight = 20;
 const regionStripTop = completeTop + completeHeight;
 const regionStripHeight = 19;
 
 function masthead() {
   const strip = { size: 11, bold: true, tracking: 1.4 };
-  const dateStyle = { font: serif, size: 100, bold: true, anchor: 'middle' };
+  const dateStyle = { font: serif, size: 86, bold: true, anchor: 'middle' };
   const deckStyle = { font: serif, size: 18, italic: true, fill: '#7f251f', anchor: 'middle' };
   const dateScale = Math.min(1, width / estimate(day.date, dateStyle));
   const deckScale = Math.min(1, (width - 12) / estimate(day.deck, deckStyle));
   return text(margin, 24, day.kicker, { ...strip, fill: red })
     + text(right, 24, day.tally, { ...strip, anchor: 'end' })
-    + group(text(0, 112, day.date, dateStyle), `translate(${size / 2} 0) scale(${dateScale} 1)`)
-    + group(text(0, 150, day.deck, deckStyle), `translate(${size / 2} 0) scale(${deckScale} 1)`)
-    + line(margin, 159, right, 159, ink, 1.5) + line(margin, 162, right, 162, ink)
-    + rect(margin, completeTop, width, completeHeight, red)
+    + group(text(0, 96, day.date, dateStyle), `translate(${size / 2} 0) scale(${dateScale} 1)`)
+    + group(text(0, deckBaseline, day.deck, deckStyle), `translate(${size / 2} 0) scale(${deckScale} 1)`)
+    + line(margin, mastheadRuleY - 3, right, mastheadRuleY - 3, ink, 1.5)
+    + line(margin, mastheadRuleY, right, mastheadRuleY, ink);
+}
+
+function completeBand() {
+  return rect(margin, completeTop, width, completeHeight, red)
     + text(size / 2, completeTop + 14, day.complete,
       { size: 11.4, bold: true, fill: light, tracking: 1.05, anchor: 'middle' });
 }
@@ -448,6 +456,27 @@ const sectionStyle = { size: 12.6, bold: true, tracking: 1.25, fill: red };
 const sectionTitle = (x, y, label) => text(x, y, label, sectionStyle);
 const timelineTop = regionStripTop + regionStripHeight;
 
+function numbersBand() {
+  const heading = ['THE DAY IN', 'NUMBERS'];
+  const headingStyle = { ...sectionStyle, size: 11.25, tracking: 0.85 };
+  const numberStyle = { size: 23, bold: true, font: serif, anchor: 'middle' };
+  const labelStyle = { size: 11, anchor: 'middle' };
+  const inset = 10;
+  const headingWidth = Math.ceil(Math.max(...heading.map((row) => estimate(row, headingStyle)))) + 2 * inset;
+  const columnWidth = (width - headingWidth) / numbers.length;
+  return rect(margin, numbersTop, width, numbersHeight, '#eee7d8')
+    + linesOfText(margin + inset, numbersTop + 17, { lines: heading, style: headingStyle }, 13)
+    + numbers.map(({ n, label }, index) => {
+      const left = margin + headingWidth + index * columnWidth;
+      const center = left + columnWidth / 2;
+      return line(left, numbersTop + 6, left, numbersTop + numbersHeight - 6)
+        + paragraph(center, numbersTop + 22, n, columnWidth - inset, 1, 0,
+          numberStyle, `number ${n}`, numberStyle.size)
+        + paragraph(center, numbersTop + 35, label, columnWidth - inset, 1, 0,
+          labelStyle, `number ${n} label`, labelStyle.size);
+    }).join('');
+}
+
 function timelineBand() {
   const heading = 'THE DAY IN UTC (APPROX.)';
   const ruleStart = margin + Math.ceil(estimate(heading, sectionStyle)) + 12;
@@ -467,7 +496,7 @@ function timelineBand() {
 }
 
 const heroTop = timelineTop + 59;
-const heroArtHeight = 75;
+const heroArtHeight = 55;
 const heroHeight = heroArtHeight + 127;
 
 function heroCard(story, index) {
@@ -524,7 +553,7 @@ function gridCard(story, index) {
 
 const detailsTop = gridTop + gridRowStep + gridHeight + 4;
 const detailsBottom = 916.5;
-const numbersWidth = 164;
+const mapWidth = 164;
 const detailsHeadingOffset = 13;
 const detailsRuleOffset = 17;
 const dateTop = detailsBottom + 0.75;
@@ -532,37 +561,125 @@ const dateHeight = 56.25;
 const dateBorder = 1;
 const noteTop = dateTop + dateHeight + 1.25;
 const noteBorder = 0.65;
-const footerAreas = [
-  { name: 'date-check box', top: dateTop - dateBorder / 2, bottom: dateTop + dateHeight + dateBorder / 2 },
-  { name: 'footer', top: noteTop - noteBorder / 2, bottom: size },
+const mapArea = { name: 'world map', left: margin, right: margin + mapWidth, top: detailsTop, bottom: detailsBottom };
+const briefsArea = { name: 'also list', left: mapArea.right + 8, right, top: detailsTop, bottom: detailsBottom };
+const dateCheckArea = {
+  name: 'date-check box', left: margin, right,
+  top: dateTop - dateBorder / 2, bottom: dateTop + dateHeight + dateBorder / 2,
+};
+const footerArea = { name: 'footer', left: margin, right, top: noteTop - noteBorder / 2, bottom: size };
+
+function assertNoOverlap(a, b) {
+  assert(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top,
+    `${a.name} overlaps the ${b.name}`);
+}
+
+// Coastlines simplified by hand, in [longitude, latitude] order.
+const land = [
+  // North America
+  [[-168, 66], [-157, 71], [-138, 70], [-125, 72], [-99, 71], [-85, 69], [-80, 63], [-90, 61],
+    [-95, 56], [-87, 52], [-80, 54], [-78, 61], [-70, 60], [-60, 53], [-65, 48], [-58, 47],
+    [-67, 43], [-74, 41], [-80, 32], [-81, 25], [-86, 30], [-94, 29], [-97, 24], [-91, 19],
+    [-87, 22], [-88, 16], [-83, 10], [-77, 8], [-81, 8], [-90, 14], [-101, 18], [-106, 23],
+    [-112, 30], [-115, 29], [-124, 42], [-125, 49], [-132, 55], [-141, 60], [-151, 58],
+    [-161, 55], [-155, 60], [-165, 61]],
+  // South America
+  [[-79, 8], [-74, 11], [-67, 10], [-59, 7], [-51, 4], [-48, 0], [-36, -5], [-35, -9],
+    [-39, -15], [-42, -23], [-49, -29], [-55, -34], [-62, -40], [-65, -48], [-68, -55],
+    [-74, -52], [-75, -44], [-72, -34], [-71, -24], [-75, -16], [-81, -6], [-80, 0]],
+  // Greenland
+  [[-61, 72], [-23, 72], [-28, 66], [-39, 63], [-44, 60], [-52, 62], [-55, 68]],
+  // Europe and Asia
+  [[-10, 36], [-9, 43], [-2, 44], [-5, 48], [2, 51], [8, 54], [8, 58], [12, 56],
+    [19, 59], [22, 65], [15, 67], [9, 62], [5, 58], [4, 62], [15, 69], [26, 72], [42, 68],
+    [58, 69], [68, 72], [93, 72], [105, 70], [126, 72], [143, 71], [163, 69], [177, 68],
+    [180, 65], [171, 62], [163, 61], [161, 55], [155, 51], [156, 59], [146, 59], [140, 53],
+    [138, 47], [130, 43], [129, 35], [125, 37], [121, 40], [119, 36], [122, 31], [119, 25],
+    [113, 22], [108, 21], [107, 16], [109, 12], [105, 9], [101, 13], [100, 7], [104, 1],
+    [100, 3], [96, 14], [92, 22], [87, 22], [81, 15], [77, 8], [74, 12], [70, 22],
+    [67, 25], [61, 25], [56, 27], [51, 29], [48, 29], [52, 25], [57, 24], [59, 21],
+    [54, 17], [45, 13], [42, 16], [38, 24], [35, 28], [34, 33], [29, 36], [26, 40],
+    [33, 42], [38, 43], [32, 46], [28, 45], [28, 41], [25, 40], [23, 36], [19, 40],
+    [14, 45], [12, 44], [17, 39], [15, 38], [10, 44], [5, 43], [0, 40], [-3, 36]],
+  // Africa
+  [[-17, 15], [-16, 22], [-10, 30], [-6, 36], [8, 37], [11, 33], [20, 32], [25, 31],
+    [33, 31], [35, 26], [38, 18], [43, 12], [51, 11], [48, 5], [42, -2], [40, -11],
+    [39, -17], [35, -24], [32, -30], [26, -34], [19, -35], [15, -28], [12, -19], [13, -12],
+    [9, -3], [9, 3], [3, 5], [-5, 5], [-12, 8]],
+  // Australia
+  [[113, -23], [116, -19], [123, -17], [130, -12], [136, -12], [137, -16], [141, -17],
+    [143, -11], [146, -17], [149, -23], [153, -27], [151, -33], [146, -39], [140, -38],
+    [136, -34], [130, -32], [124, -33], [116, -35], [114, -29]],
+  // British Isles, Iceland, Japan, island Southeast Asia, Madagascar and New Zealand
+  [[-10, 52], [-9, 55], [-6, 55], [-5, 58], [-2, 58], [1, 52], [-5, 50]],
+  [[-24, 64], [-22, 67], [-14, 66], [-15, 64]],
+  [[130, 32], [134, 34], [138, 36], [141, 41], [144, 44], [146, 43], [142, 38], [141, 35], [134, 32]],
+  [[95, 5], [100, 3], [106, -5], [115, -8], [109, -8], [103, -5], [99, 0]],
+  [[109, 0], [112, 4], [118, 7], [119, 1], [116, -4], [111, -3]],
+  [[130, -2], [137, -2], [147, -6], [151, -9], [143, -9], [137, -6], [132, -5]],
+  [[49, -12], [50, -16], [47, -24], [44, -26], [43, -22], [45, -16]],
+  [[173, -35], [178, -38], [175, -42], [169, -46], [166, -46], [170, -42], [175, -39]],
 ];
 
-function numbersBand() {
+// Pixel offsets keep the dense cluster readable in the small map panel.
+const pinOffsets = {
+  1: [-10, 13], 2: [-4, -13], 3: [7, 11], 4: [-13, -9], 6: [-24, -1], 7: [-17, 17],
+  8: [19, -2], 9: [1, 13], 10: [16, -15], 11: [4, 10], 13: [0, -13],
+};
+
+function worldMap() {
   const inset = 8;
-  const x = margin + inset;
-  const y = detailsTop;
-  const contentRight = margin + numbersWidth - inset;
-  const numberWidth = 58;
-  const numberRight = x + numberWidth;
-  const labelX = numberRight + 4;
-  const labelLeading = 11.25;
-  const labelStyle = { size: 11.5 };
-  const rowsTop = y + 21;
-  const rowHeight = (detailsBottom - rowsTop - 3) / numbers.length;
-  return rect(margin, y, numbersWidth, detailsBottom - y, '#eee7d8')
-    + text(x, y + detailsHeadingOffset, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
-    + line(x, y + detailsRuleOffset, contentRight, y + detailsRuleOffset)
-    + numbers.map(({ n, label }, index) => {
-      const center = rowsTop + (index + 0.5) * rowHeight;
-      const fitted = fit(label, contentRight - labelX, 2, labelStyle, `number ${n} label`, 11);
-      const labelBaseline = center + 3.25 - (fitted.lines.length - 1) * labelLeading / 2;
-      return text(numberRight, center + 7.25, n, { size: 21, bold: true, font: serif, anchor: 'end' })
-        + linesOfText(labelX, labelBaseline, fitted, labelLeading);
-    }).join('');
+  const left = mapArea.left + inset;
+  const right = mapArea.right - inset;
+  const top = mapArea.top + 32;
+  const bottom = top + 96;
+  const project = (lat, lon) => [left + (lon + 170) * (right - left) / 350, top + (72 - lat) * (bottom - top) / 127];
+  const graticuleColor = '#334159';
+  const graticule = [-120, -60, 0, 60, 120].map((lon) => {
+    const [x] = project(0, lon);
+    return line(x, top, x, bottom, graticuleColor, 0.6);
+  }).join('') + [-30, 0, 30, 60].map((lat) => {
+    const [, y] = project(lat, 0);
+    return line(left, y, right, y, graticuleColor, 0.6);
+  }).join('');
+  const continents = land.map((coast) => {
+    const points = coast.map(([lon, lat]) => project(lat, lon).map((value) => value.toFixed(2)).join(',')).join(' ');
+    return element('polygon', { points, fill: '#647f83' });
+  }).join('');
+
+  const pinRadius = 8.25;
+  const pinStroke = 0.9;
+  const pinEdge = pinRadius + pinStroke / 2;
+  const pins = [...heroes, ...grid].map(({ id, pin: [lat, lon] }) => {
+    const [originX, originY] = project(lat, lon);
+    const [dx, dy] = pinOffsets[id] ?? [0, 0];
+    return { id, originX, originY, x: originX + dx, y: originY + dy, offset: dx !== 0 || dy !== 0 };
+  });
+  const pinLabel = { size: 11.5, bold: true, anchor: 'middle', fill: '#fff' };
+  for (const [index, { id, x, y }] of pins.entries()) {
+    assert(x - pinEdge >= left && x + pinEdge <= right
+      && y - pinEdge >= mapArea.top + 24 && y + pinEdge <= bottom,
+    `Map pin ${id} extends outside the map artwork`);
+    assert(estimate(String(id), pinLabel) <= 2 * pinRadius, `Map pin ${id} label is too wide`);
+    for (const other of pins.slice(index + 1)) {
+      assert(Math.hypot(x - other.x, y - other.y) >= 2 * pinEdge, `Map pins ${id} and ${other.id} overlap`);
+    }
+  }
+  const leaders = pins.filter(({ offset }) => offset).map(({ x, y, originX, originY }) =>
+    line(originX, originY, x, y, '#e3d8ba', 0.75) + circle(originX, originY, 1.05, '#e3d8ba')).join('');
+  const markers = pins.map(({ id, x, y }) => circle(x, y, pinRadius, red, outline(light, pinStroke))
+    + text(x, y + 4, id, pinLabel)).join('');
+
+  return rect(mapArea.left, mapArea.top, mapWidth, mapArea.bottom - mapArea.top, ink)
+    + text(left, mapArea.top + 15, 'WHERE IT HAPPENED', { ...sectionStyle, size: 11.25, tracking: 0.95, fill: light })
+    + line(left, mapArea.top + 21, right, mapArea.top + 21, '#55647a', 0.75)
+    + graticule + continents + leaders + markers
+    + line(left, mapArea.bottom - 31, right, mapArea.bottom - 31, '#55647a', 0.75)
+    + text(left, mapArea.bottom - 14, 'pins = story numbers', { size: 11, fill: '#e3d8ba' });
 }
 
 function briefsBand() {
-  const left = margin + numbersWidth + 8;
+  const left = briefsArea.left;
   const gap = 10;
   const columnWidth = (right - left - gap) / 2;
   const divider = left + columnWidth + gap / 2;
@@ -579,11 +696,10 @@ function briefsBand() {
       return entries.map(({ region, text: description }, index) => {
         const id = heroes.length + grid.length + column * columnLength + index + 1;
         const y = firstBaseline + index * leading;
-        // The footer areas span the list, so check the line's ascent and descent against each one.
-        for (const { name, top, bottom } of footerAreas) {
-          if (y - bodyStyle.size < bottom && y + bodyStyle.size / 4 > top) {
-            throw new Error(`Brief ${id} overlaps the ${name}`);
-          }
+        const brief = { name: `Brief ${id}`, left: x, right: x + columnWidth,
+          top: y - bodyStyle.size, bottom: y + bodyStyle.size / 4 };
+        for (const area of [mapArea, dateCheckArea, footerArea]) {
+          assertNoOverlap(brief, area);
         }
         const prefix = `${region} ·`;
         const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
@@ -628,12 +744,27 @@ function footer() {
     + legend;
 }
 
+const sections = [
+  { name: 'masthead', top: margin, bottom: mastheadRuleY + 0.5 },
+  { name: 'numbers band', top: numbersTop, bottom: numbersTop + numbersHeight },
+  { name: 'complete day bar', top: completeTop, bottom: regionStripTop },
+  { name: 'region strip', top: regionStripTop, bottom: timelineTop },
+  { name: 'timeline', top: timelineTop, bottom: heroTop },
+  { name: 'heroes', top: heroTop, bottom: heroTop + heroHeight },
+  { name: 'story grid', top: gridTop, bottom: gridTop + gridRowStep + gridHeight },
+  mapArea, briefsArea, dateCheckArea, footerArea,
+].map((area) => ({ left: margin, right, ...area }));
+for (const [index, section] of sections.entries()) {
+  for (const other of sections.slice(index + 1)) assertNoOverlap(section, other);
+}
+
 const stipple = element('pattern', { id: 'stipple', width: 7, height: 7, patternUnits: 'userSpaceOnUse' },
   circle(1, 1, 0.5, ink, { opacity: 0.23 }) + circle(4.5, 4.5, 0.4, light, { opacity: 0.45 }));
 const svg = element('svg', { xmlns: 'http://www.w3.org/2000/svg', width: size, height: size, viewBox: `0 0 ${size} ${size}` },
   [element('title', {}, escape(day.date)), element('defs', {}, stipple), band(size, size, paper),
-    masthead(), regionStrip(), timelineBand(), heroes.map(heroCard).join('\n'), grid.map(gridCard).join('\n'),
-    numbersBand(), briefsBand(), line(margin, detailsTop, right, detailsTop, ink, 1.5), footer()].join('\n'));
+    masthead(), numbersBand(), completeBand(), regionStrip(), timelineBand(), heroes.map(heroCard).join('\n'),
+    grid.map(gridCard).join('\n'), worldMap(), briefsBand(), line(margin, detailsTop, right, detailsTop, ink, 1.5),
+    footer()].join('\n'));
 
 const build = new URL('./build/', import.meta.url);
 mkdirSync(build, { recursive: true });
