@@ -383,12 +383,12 @@ function timelineBand() {
   return sectionTitle(margin, 185, heading) + line(ruleStart, 181, right, 181)
     + timeline.map(({ t, text: description }, index) => {
       const x = margin + index * colWidth;
-      const inset = index === 0 ? 0 : 9;
-      const limit = colWidth - inset - 6;
+      const inset = index === 0 ? 0 : 5;
+      const limit = colWidth - inset - 4;
       return (index === 0 ? '' : line(x, 193, x, 228))
-        + paragraph(x + inset, 204, t, limit, 1, 0, { size: 13.1, bold: true }, `timeline label ${t}`)
+        + paragraph(x + inset, 204, t, limit, 1, 0, { size: 13.1, bold: true }, `timeline label ${t}`, 11)
         + paragraph(x + inset, 217, description, limit, 2, 11.1,
-          { size: 11.5 }, `timeline ${t}`);
+          { size: 11.5 }, `timeline ${t}`, 11);
     }).join('');
 }
 
@@ -441,68 +441,72 @@ function gridCard(story, index) {
       { size: 9.2, italic: true, fill: muted }, `${story.id} source`);
 }
 
+const detailsTop = 756;
+const detailsBottom = 940;
+const numbersWidth = 156;
+
 function numbersBand() {
-  const x = margin + 8;
-  const y = 756;
-  const cellWidth = 109;
-  return rect(margin, y, 228, 162, '#eee7d8') + sectionTitle(x, y + 17, 'THE DAY IN NUMBERS')
-    + line(x, y + 23, 234, y + 23)
+  const inset = 8;
+  const x = margin + inset;
+  const y = detailsTop;
+  const cellWidth = (numbersWidth - 2 * inset) / 2;
+  return rect(margin, y, numbersWidth, detailsBottom - y, '#eee7d8')
+    + text(x, y + 17, 'THE DAY IN NUMBERS', { ...sectionStyle, size: 11.25, tracking: 0.6 })
+    + line(x, y + 23, margin + numbersWidth - inset, y + 23)
     + numbers.map(({ n, label }, index) => {
       const column = index % 2;
       const left = x + column * cellWidth;
-      const baseline = y + 43 + Math.floor(index / 2) * 45;
-      return text(left, baseline, n, { size: 26, bold: true, font: serif })
-        + paragraph(left, baseline + 12.5, label, cellWidth, 2, 11.5,
-          { size: 11.6 }, `number ${n} label`);
+      const baseline = y + 43 + Math.floor(index / 2) * 52;
+      return text(left, baseline, n, { size: 23, bold: true, font: serif })
+        + paragraph(left, baseline + 11.25, label, cellWidth, 3, 11.5,
+          { size: 11.6 }, `number ${n} label`, 11.1);
     }).join('');
 }
 
 function briefsBand() {
-  const left = 254;
-  const gap = 12;
-  const divider = left + 400;
+  const left = margin + numbersWidth + 8;
+  const gap = 10;
+  const columnWidth = (right - left - gap) / 2;
+  const divider = left + columnWidth + gap / 2;
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
-  const leading = 12.8;
-  return sectionTitle(left, 773, 'ALSO ON SUNDAY 22 NOVEMBER')
-    + line(left, 779, right, 779)
-    + line(divider, 785, divider, 918)
+  return sectionTitle(left, detailsTop + 17, 'ALSO ON SUNDAY 22 NOVEMBER')
+    + line(left, detailsTop + 23, right, detailsTop + 23)
+    + line(divider, detailsTop + 29, divider, detailsBottom)
     + columns.map((entries, column) => {
-      const x = column === 0 ? left : divider + gap / 2;
-      const bodyRight = column === 0 ? divider - gap / 2 : right;
-      let y = 793.5;
+      const x = left + column * (columnWidth + gap);
       return entries.map(({ region, text: description }, index) => {
         const id = heroes.length + grid.length + column * columnLength + index + 1;
+        const y = detailsTop + 36.5 + index * 13;
         const prefix = `${region} ·`;
-        const regionStyle = { size: 12.2, bold: true, fill: regionColors[region] };
-        const regionX = x + 20;
+        const regionStyle = { size: 11.5, bold: true, fill: regionColors[region] };
+        const regionX = x + 18;
         const bodyX = regionX + Math.ceil(estimate(prefix, regionStyle)) + 3;
-        const fitted = fit(description, bodyRight - bodyX - 2, 2, { size: 12.2 }, `brief ${id}`, 12);
-        const entry = text(x + 14, y, id, { size: 12, bold: true, anchor: 'end', fill: muted })
+        return text(x + 14, y, id, { size: 11.5, bold: true, anchor: 'end', fill: muted })
           + text(regionX, y, prefix, regionStyle)
-          + linesOfText(bodyX, y, fitted, leading);
-        y += 15.6 + (fitted.lines.length - 1) * leading;
-        return entry;
+          + paragraph(bodyX, y, description, x + columnWidth - bodyX - 2, 1, 0,
+            { size: 12 }, `brief ${id}`, 11.5);
       }).join('');
     }).join('');
 }
 
 function footer() {
-  const legendBaseline = 1018;
+  const legendBaseline = 1020;
   const noteInset = 9;
-  const noteStyle = { font: 'Adwaita Sans', size: 12, weight: 600, fill: ink };
+  const noteStyle = { font: 'Adwaita Sans', size: 11.5, weight: 600, fill: ink };
   const legend = Object.entries(statuses).map(([status, { ink: color, meaning }], index) => {
     const legendX = margin + index * (width / 4);
     const style = { size: 8.9, bold: true, fill: color, tracking: 0.45 };
     return text(legendX, legendBaseline, status, style)
       + text(legendX + Math.ceil(estimate(status, style)) + 5, legendBaseline, `· ${meaning}`, { size: 9.1, fill: muted });
   }).join('');
-  return rect(margin + 0.5, 923.5, width - 1, 39, 'none', outline(red))
-    + text(margin + 9, 946, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
-    + paragraph(margin + 101, 934.5, dateCheck, width - 110, 3, 12, { size: 11.5 }, 'date check', 11)
-    + rect(margin, 965, width, 32, '#ede8dc', outline(rule, 0.65))
-    + paragraph(margin + noteInset, 977, judgeNote, width - 2 * noteInset, 2, 13.5, noteStyle, 'judge note')
-    + paragraph(margin, 1006, sources, width, 1, 0, { size: 9.2, italic: true, fill: muted }, 'sources')
+  return rect(margin + 0.5, 942.5, width - 1, 34, 'none', outline(red))
+    + text(margin + 9, 963, 'DATE CHECK', { size: 11.5, fill: red, bold: true, tracking: 0.75 })
+    + paragraph(margin + 101, 952.5, dateCheck, width - 110, 3, 10.5,
+      { size: 10.75 }, 'date check', 10.5)
+    + rect(margin, 978, width, 23, '#ede8dc', outline(rule, 0.65))
+    + paragraph(margin + noteInset, 987, judgeNote, width - 2 * noteInset, 2, 11.5, noteStyle, 'judge note')
+    + paragraph(margin, 1009, sources, width, 1, 0, { size: 9.2, italic: true, fill: muted }, 'sources')
     + legend;
 }
 
@@ -511,7 +515,7 @@ const stipple = element('pattern', { id: 'stipple', width: 7, height: 7, pattern
 const svg = element('svg', { xmlns: 'http://www.w3.org/2000/svg', width: size, height: size, viewBox: `0 0 ${size} ${size}` },
   [element('title', {}, escape(day.date)), element('defs', {}, stipple), band(size, size, paper),
     masthead(), timelineBand(), heroes.map(heroCard).join('\n'), grid.map(gridCard).join('\n'),
-    numbersBand(), briefsBand(), line(margin, 756, right, 756, ink, 1.5), footer()].join('\n'));
+    numbersBand(), briefsBand(), line(margin, detailsTop, right, detailsTop, ink, 1.5), footer()].join('\n'));
 
 const build = new URL('./build/', import.meta.url);
 mkdirSync(build, { recursive: true });

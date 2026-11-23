@@ -7,7 +7,7 @@
 export const day = {
   date: 'Sunday 22 November 2026',
   kicker: 'ONE DAY OF WORLD NEWS, ONE PICTURE',
-  tally: '26 STORIES · 6 REGIONS · 12 FIELDS · ALL FROM THIS SUNDAY',
+  tally: '36 STORIES · 6 REGIONS · ALL FROM THIS SUNDAY',
   complete: 'COMPLETE DAY · 00:00–24:00 UTC · COMPILED AND CHECKED AFTER THE DAY ENDED',
 };
 
@@ -18,8 +18,9 @@ export const timeline = [
   { t: '01–10', text: 'Hong Kong committee polls' },
   { t: '~04:00', text: 'Russian corvette sinks at Benghazi' },
   { t: '~11:00', text: 'Pope lunches with 1,300 poor' },
+  { t: '12:23', text: 'SpaceX spy-satellite launch' },
   { t: 'Afternoon', text: 'COP31 ends with no deal' },
-  { t: 'Evening', text: 'Alcaraz wins in Turin' },
+  { t: '~19:00', text: 'Alcaraz wins in Turin' },
 ];
 
 export const numbers = [
@@ -56,8 +57,8 @@ export const heroes = [
 ];
 
 export const grid = [
-  { id: 4, region: 'ITALY · TENNIS', status: 'CONFIRMED', art: 'tennis', tag: 'TURIN',
-    head: 'Alcaraz beats Zverev for first ATP Finals title', body: 'Straight-sets win in the final.', src: 'ATP' },
+  { id: 4, region: 'ITALY · TENNIS', status: 'CONFIRMED', art: 'tennis', tag: '6-2 7-6',
+    head: 'Alcaraz beats Zverev for first ATP Finals title', body: 'Saves 3 set points in the Turin final.', src: 'ATP, Reuters' },
   { id: 5, region: 'SOUTH KOREA · EDUCATION', status: 'OFFICIAL', art: 'exam', tag: 'RESIGNS',
     head: 'Education minister quits over exam-cheating chaos', body: 'President Lee accepts; orders a review.', src: 'JoongAng Daily, SCMP' },
   { id: 6, region: 'LIBYA · WAR', status: 'CONFIRMED', art: 'ship', tag: 'SUNK',
@@ -83,14 +84,24 @@ export const also = [
   { region: 'Europe', text: 'Geneva: Gukesh v Sindarov world chess match opens' },
   { region: 'Europe', text: 'Football: Liverpool 4, Manchester United 0' },
   { region: 'Middle East', text: 'West Bank: settlers torch homes and cars near Ramallah' },
+  { region: 'Europe', text: 'Poland says Russia twice plotted to kill a Ukrainian rapper' },
+  { region: 'Europe', text: 'MotoGP: Marc Márquez clinches his 8th premier-class title' },
   { region: 'Middle East', text: 'Saudi-led coalition downs Houthi missile and drone' },
+  { region: 'Middle East', text: 'Syria destroys 400 million seized Captagon pills' },
+  { region: 'Middle East', text: 'Israel: Likud–Yashar unity talks end without a deal' },
+  { region: 'Africa', text: 'Kenya and DR Congo restore full ties at Oyo summit' },
   { region: 'Asia', text: 'S. Korea: KEPCO breach exposes 1.52m people' },
   { region: 'Asia', text: 'S. Korea: hull of missing trawler found; 7 still missing' },
   { region: 'Asia', text: 'S. Korea readies $8bn fund to steady markets after AI sell-off' },
   { region: 'Asia', text: 'Golf: Jeeno Thitikul wins a third straight CME title' },
+  { region: 'Asia', text: 'India: crash in Rajasthan kills 9 of one family' },
+  { region: 'Asia', text: 'Bangladesh: garment workers block highway over pay' },
+  { region: 'Asia', text: 'Taiwan: HK film "We Are Born Good" wins top Golden Horse' },
   { region: 'Americas', text: 'NFL in Mexico City: 49ers 35, Vikings 10' },
   { region: 'Americas', text: 'Brazil: storm toll rises to 5, about 250 hurt' },
   { region: 'Americas', text: 'Colombia asks X to suspend ex-president Petro\'s account' },
+  { region: 'Americas', text: 'Chile: head-on crash in Chiloé kills 6 of one family' },
+  { region: 'Americas', text: 'US: SpaceX launches NROL-136 spy satellites' },
   { region: 'Oceania', text: 'Australia: Marles says US budget office "wrong" on AUKUS' },
 ];
 
@@ -103,4 +114,4 @@ export const judgeNote = 'Note for the judge: this page was compiled after 22 No
   'Events from Friday or Saturday are named in the date check, not shown as Sunday news. It shows how Sunday finished: ' +
   'COP31 ended with no deal and Alcaraz won in Turin.';
 
-export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU) · drawings made in code';
+export const sources = 'Sources: AP, AFP, Reuters, CNN, Al Jazeera, Kyiv Post, ATP, JoongAng Daily, Korea Times, HK govt, WHO, ABC (AU), Xinhua · drawings made in code';
