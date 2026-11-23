@@ -7,9 +7,13 @@
 export const day = {
   date: 'Sunday 22 November 2026',
   kicker: 'ONE DAY OF WORLD NEWS, ONE PICTURE',
-  tally: '38 STORIES · 6 REGIONS · ALL FROM THIS SUNDAY',
+  tally: '39 STORIES · 6 REGIONS · ALL FROM THIS SUNDAY',
+  deck: 'COP31 ends with no climate pact · Russian strikes kill 15 around Kyiv · Trump weighs new Iran strikes · Alcaraz wins in Turin',
   complete: 'COMPLETE DAY · 00:00–24:00 UTC · COMPILED AND CHECKED AFTER THE DAY ENDED',
 };
+
+// Order of the region strip. Counts are computed from heroes/grid 'area' and also 'region'.
+export const regions = ['Europe', 'Middle East', 'Africa', 'Asia', 'Americas', 'Oceania'];
 
 // Approximate UTC times, in order.
 export const timeline = [
@@ -34,21 +38,21 @@ export const numbers = [
 
 export const heroes = [
   {
-    id: 1, region: 'TÜRKİYE · CLIMATE', status: 'CONFIRMED', badge: 'NO DEAL',
+    id: 1, area: 'Europe', region: 'TÜRKİYE · CLIMATE', status: 'CONFIRMED', badge: 'NO DEAL',
     art: 'summit',
     head: 'COP31 collapses in Antalya without a climate pact',
     body: 'Talks end about 44 hours late. The EU, Norway and Panama reject a draft that leaves out fossil fuels. UN chief "deeply disappointed".',
     src: 'CNN, CBS News, UN',
   },
   {
-    id: 2, region: 'UKRAINE · WAR', status: 'CONFIRMED', badge: '15 DEAD',
+    id: 2, area: 'Europe', region: 'UKRAINE · WAR', status: 'CONFIRMED', badge: '15 DEAD',
     art: 'blocks',
     head: 'Russian strikes kill 15; a block collapses in Dymer',
     body: 'A boy of 7 is pulled out alive after about 14 hours under the rubble. Zelensky asks the US to release Patriot missiles.',
     src: 'Kyiv Post, Al Jazeera',
   },
   {
-    id: 3, region: 'USA · IRAN', status: 'OFFICIAL', badge: 'WAR THREAT',
+    id: 3, area: 'Middle East', region: 'USA · IRAN', status: 'OFFICIAL', badge: 'WAR THREAT',
     art: 'tanker',
     head: 'Trump "inclined" to resume Iran strikes after New Year',
     body: 'He tells Fox News talks may fail. Iran\'s navy claims 2 more tankers hit mines near Hormuz (unverified). Tehran starts rolling power cuts.',
@@ -57,25 +61,25 @@ export const heroes = [
 ];
 
 export const grid = [
-  { id: 4, region: 'ITALY · TENNIS', status: 'CONFIRMED', art: 'tennis', tag: '6-2 7-6',
+  { id: 4, area: 'Europe', region: 'ITALY · TENNIS', status: 'CONFIRMED', art: 'tennis', tag: '6-2 7-6',
     head: 'Alcaraz beats Zverev for first ATP Finals title', body: 'Saves 3 set points in the Turin final.', src: 'ATP, Reuters' },
-  { id: 5, region: 'SOUTH KOREA · EDUCATION', status: 'OFFICIAL', art: 'exam', tag: 'RESIGNS',
+  { id: 5, area: 'Asia', region: 'SOUTH KOREA · EDUCATION', status: 'OFFICIAL', art: 'exam', tag: 'RESIGNS',
     head: 'Education minister quits over exam-cheating chaos', body: 'President Lee accepts; orders a review.', src: 'JoongAng Daily, SCMP' },
-  { id: 6, region: 'LIBYA · WAR', status: 'CONFIRMED', art: 'ship', tag: 'SUNK',
+  { id: 6, area: 'Africa', region: 'LIBYA · WAR', status: 'CONFIRMED', art: 'ship', tag: 'SUNK',
     head: 'Russian corvette sinks after blast in Benghazi', body: 'Suspected sea-drone strike at dawn.', src: 'Al Jazeera, WSJ' },
-  { id: 7, region: 'SUDAN · WAR', status: 'CONFIRMED', art: 'drone', tag: 'UN SITE HIT',
+  { id: 7, area: 'Africa', region: 'SUDAN · WAR', status: 'CONFIRMED', art: 'drone', tag: 'UN SITE HIT',
     head: 'Drones kill 4 in Khartoum and Omdurman', body: 'UN says its staff premises were damaged.', src: 'AFP, UN' },
-  { id: 8, region: 'SYRIA · CONFLICT', status: 'CONFIRMED', art: 'mine', tag: '5 CHILDREN',
+  { id: 8, area: 'Middle East', region: 'SYRIA · CONFLICT', status: 'CONFIRMED', art: 'mine', tag: '5 CHILDREN',
     head: 'Old landmine kills 5 children in Idlib', body: 'Aged 8 to 15, near Khan Sheikhoun.', src: 'SANA, The New Arab' },
-  { id: 9, region: 'DR CONGO · HEALTH', status: 'OFFICIAL', art: 'health', tag: 'EBOLA',
+  { id: 9, area: 'Africa', region: 'DR CONGO · HEALTH', status: 'OFFICIAL', art: 'health', tag: 'EBOLA',
     head: 'WHO: fighting disrupts the Ebola response', body: 'Clashes near a hospital in Ituri.', src: 'WHO, Reuters' },
-  { id: 10, region: 'TÜRKİYE · MEDIA', status: 'CONFIRMED', art: 'crowd', tag: 'ISTANBUL',
+  { id: 10, area: 'Europe', region: 'TÜRKİYE · MEDIA', status: 'CONFIRMED', art: 'crowd', tag: 'ISTANBUL',
     head: 'Thousands march against media crackdown', body: 'Five days after police seized Sözcü TV.', src: 'AFP, Turkish Minute' },
-  { id: 11, region: 'HONG KONG · POLITICS', status: 'OFFICIAL', art: 'ballot', tag: '98.8% TURNOUT',
+  { id: 11, area: 'Asia', region: 'HONG KONG · POLITICS', status: 'OFFICIAL', art: 'ballot', tag: '98.8% TURNOUT',
     head: 'Hong Kong fills Election Committee seats', body: '856 candidates for 723 seats.', src: 'HK govt' },
-  { id: 12, region: 'USA · POLITICS', status: 'CONFIRMED', art: 'capitol', tag: 'RECOUNT',
+  { id: 12, area: 'Americas', region: 'USA · POLITICS', status: 'CONFIRMED', art: 'capitol', tag: 'RECOUNT',
     head: 'Democrat Hubbard wins NC-5 after recount', body: 'Foxx concedes; Democrats near 258 seats.', src: 'AP, ABC News' },
-  { id: 13, region: 'NEW ZEALAND · CRICKET', status: 'CONFIRMED', art: 'cricket', tag: '720/9',
+  { id: 13, area: 'Oceania', region: 'NEW ZEALAND · CRICKET', status: 'CONFIRMED', art: 'cricket', tag: '720/9',
     head: 'India declare on a record 720/9', body: 'NZ reach 119/2 in Wellington.', src: 'Sunday Guardian, Dynamite News' },
 ];
 
@@ -104,6 +108,7 @@ export const also = [
   { region: 'Americas', text: 'US: Delta system glitch delays 1,000+ flights' },
   { region: 'Americas', text: 'Trump hosts dinner for top $TRUMP coin holders' },
   { region: 'Americas', text: 'US: SpaceX launches NROL-136 spy satellites' },
+  { region: 'Oceania', text: 'Australia: TV icon Molly Meldrum dies at 83 (late Sun UTC)' },
   { region: 'Oceania', text: 'Australia: Marles says US budget office "wrong" on AUKUS' },
 ];
 

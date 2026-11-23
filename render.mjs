@@ -1,8 +1,9 @@
+import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { also, dateCheck, day, grid, heroes, judgeNote, numbers, sources, timeline } from './stories.mjs';
+import { also, dateCheck, day, grid, heroes, judgeNote, numbers, regions, sources, timeline } from './stories.mjs';
 
 const size = 1024;
 const margin = 14;
@@ -126,10 +127,14 @@ const regionColors = {
   Europe: '#355284', 'Middle East': '#8c3c26', Africa: '#755317', Asia: '#21634f',
   Americas: '#68456d', Oceania: '#23636e', World: '#4d5363',
 };
-const storyRegions = [
-  'Middle East', 'Europe', 'Middle East', 'Europe', 'Asia', 'Africa', 'Africa',
-  'Middle East', 'Africa', 'Middle East', 'Asia', 'Americas', 'Oceania',
-];
+const regionCounts = Object.fromEntries(regions.map((region) => [region, 0]));
+const storyAreas = [...heroes, ...grid].map(({ area }) => area).concat(also.map(({ region }) => region));
+for (const region of storyAreas) {
+  assert(Object.hasOwn(regionCounts, region), `Unknown story region: ${region}`);
+  regionCounts[region]++;
+}
+const storyCount = Object.values(regionCounts).reduce((sum, count) => sum + count, 0);
+assert.equal(storyCount, 39, 'Region counts must add up to 39 stories');
 
 const statuses = {
   CONFIRMED: { fill: '#deeadc', ink: '#24583b', meaning: 'carried by 2+ outlets' },
@@ -149,7 +154,7 @@ function statusPill(rightEdge, y, status, small = false) {
 }
 
 function storyLabel(x, y, story, limit, hero = false) {
-  const color = regionColors[storyRegions[story.id - 1]];
+  const color = regionColors[story.area];
   const radius = hero ? 7.8 : 6.3;
   return circle(x + radius, y, radius, color)
     + text(x + radius, y + (hero ? 3.35 : 2.9), story.id,
@@ -361,73 +366,125 @@ function artPanel(story, x, y, w, artHeight, height = artHeight) {
   }, illustrations[story.art]());
 }
 
+const completeTop = 166;
+const completeHeight = 20;
+const regionStripTop = completeTop + completeHeight;
+const regionStripHeight = 19;
+
 function masthead() {
   const strip = { size: 11, bold: true, tracking: 1.4 };
   const dateStyle = { font: serif, size: 100, bold: true, anchor: 'middle' };
-  const scale = Math.min(1, width / estimate(day.date, dateStyle));
+  const deckStyle = { font: serif, size: 18, italic: true, fill: '#7f251f', anchor: 'middle' };
+  const dateScale = Math.min(1, width / estimate(day.date, dateStyle));
+  const deckScale = Math.min(1, (width - 12) / estimate(day.deck, deckStyle));
   return text(margin, 24, day.kicker, { ...strip, fill: red })
     + text(right, 24, day.tally, { ...strip, anchor: 'end' })
-    + group(text(0, 112, day.date, dateStyle), `translate(${size / 2} 0) scale(${scale} 1)`)
-    + line(margin, 138, right, 138, ink, 1.5) + line(margin, 142, right, 142, ink)
-    + rect(margin, 148, width, 20, red)
-    + text(size / 2, 162, day.complete, { size: 11.4, bold: true, fill: light, tracking: 1.05, anchor: 'middle' });
+    + group(text(0, 112, day.date, dateStyle), `translate(${size / 2} 0) scale(${dateScale} 1)`)
+    + group(text(0, 150, day.deck, deckStyle), `translate(${size / 2} 0) scale(${deckScale} 1)`)
+    + line(margin, 159, right, 159, ink, 1.5) + line(margin, 162, right, 162, ink)
+    + rect(margin, completeTop, width, completeHeight, red)
+    + text(size / 2, completeTop + 14, day.complete,
+      { size: 11.4, bold: true, fill: light, tracking: 1.05, anchor: 'middle' });
+}
+
+function regionStrip() {
+  const style = { size: 11, bold: true, fill: '#fff', tracking: 0.5, anchor: 'middle' };
+  const segments = regions.map((region) => {
+    const count = regionCounts[region];
+    const label = `${region.toUpperCase()} ${count}`;
+    return { region, count, label, minimumWidth: Math.ceil(estimate(label, style) + 14) };
+  });
+  assert(segments.reduce((sum, segment) => sum + segment.minimumWidth, 0) <= width,
+    'Region strip labels must fit on the page');
+
+  const fixedWidths = new Map();
+  let remainingWidth = width;
+  let remainingStories = storyCount;
+  // Give undersized segments their minimum width, then divide the remaining width by count.
+  while (true) {
+    const undersized = segments.find(({ region, count, minimumWidth }) =>
+      !fixedWidths.has(region) && remainingWidth * count < minimumWidth * remainingStories);
+    if (!undersized) break;
+    fixedWidths.set(undersized.region, undersized.minimumWidth);
+    remainingWidth -= undersized.minimumWidth;
+    remainingStories -= undersized.count;
+  }
+
+  let edge = margin;
+  return segments.map(({ region, count, label }) => {
+    const left = Math.round(edge);
+    edge += fixedWidths.get(region) ?? remainingWidth * count / remainingStories;
+    const segmentWidth = Math.round(edge) - left;
+    return rect(left, regionStripTop, segmentWidth, regionStripHeight, regionColors[region])
+      + text(left + segmentWidth / 2, regionStripTop + 13.5, label, style);
+  }).join('');
 }
 
 const sectionStyle = { size: 12.6, bold: true, tracking: 1.25, fill: red };
 const sectionTitle = (x, y, label) => text(x, y, label, sectionStyle);
+const timelineTop = regionStripTop + regionStripHeight;
 
 function timelineBand() {
   const heading = 'THE DAY IN UTC (APPROX.)';
   const ruleStart = margin + Math.ceil(estimate(heading, sectionStyle)) + 12;
   const colWidth = width / timeline.length;
-  return sectionTitle(margin, 185, heading) + line(ruleStart, 181, right, 181)
+  return sectionTitle(margin, timelineTop + 13, heading)
+    + line(ruleStart, timelineTop + 9, right, timelineTop + 9)
     + timeline.map(({ t, text: description }, index) => {
       const x = margin + index * colWidth;
       const inset = index === 0 ? 0 : 5;
       const limit = colWidth - inset - 4;
-      return (index === 0 ? '' : line(x, 193, x, 228))
-        + paragraph(x + inset, 204, t, limit, 1, 0, { size: 13.1, bold: true }, `timeline label ${t}`, 11)
-        + paragraph(x + inset, 217, description, limit, 2, 11.1,
+      return (index === 0 ? '' : line(x, timelineTop + 18, x, timelineTop + 53))
+        + paragraph(x + inset, timelineTop + 28, t, limit, 1, 0,
+          { size: 13.1, bold: true }, `timeline label ${t}`, 11)
+        + paragraph(x + inset, timelineTop + 41, description, limit, 2, 11.1,
           { size: 11.5 }, `timeline ${t}`, 11);
     }).join('');
 }
 
+const heroTop = timelineTop + 59;
+const heroArtHeight = 75;
+const heroHeight = heroArtHeight + 127;
+
 function heroCard(story, index) {
   const w = 324;
-  const h = 237;
   const x = margin + index * 336;
-  const y = 235;
+  const y = heroTop;
+  const textTop = y + heroArtHeight;
   const inset = 9;
   const contents = w - 2 * inset;
   const left = x + inset;
   const badge = fit(story.badge, contents - 15, 1,
     { size: 11.2, bold: true, tracking: 0.8, fill: light }, `${story.id} badge`).style;
-  return rect(x + 0.5, y + 0.5, w - 1, h - 1, '#faf6ed', outline(rule))
-    + artPanel(story, x, y, w, 110)
+  return rect(x + 0.5, y + 0.5, w - 1, heroHeight - 1, '#faf6ed', outline(rule))
+    + artPanel(story, x, y, w, 110, heroArtHeight)
     + rect(left, y + 8, Math.ceil(estimate(story.badge, badge) + 15), 19, red)
     + text(left + 7, y + 21, story.badge, badge)
-    + storyLabel(left, y + 125, story, contents - 95, true)
-    + statusPill(x + w - inset, y + 117, story.status)
-    + paragraph(left, y + 150, story.head, contents - 2, 2, 22.5,
+    + storyLabel(left, textTop + 15, story, contents - 95, true)
+    + statusPill(x + w - inset, textTop + 7, story.status)
+    + paragraph(left, textTop + 40, story.head, contents - 2, 2, 22.5,
       { font: serif, bold: true, size: 23 }, `${story.id} headline`)
-    + paragraph(left, y + 190, story.body, contents - 2, 3, 12.4,
+    + paragraph(left, textTop + 80, story.body, contents - 2, 3, 12.4,
       { size: 12.2 }, `${story.id} body`)
-    + paragraph(left, y + 229, story.src, contents, 1, 0,
+    + paragraph(left, textTop + 119, story.src, contents, 1, 0,
       { size: 10.5, italic: true, fill: muted }, `${story.id} source`);
 }
 
+const gridTop = heroTop + heroHeight + 4;
+const gridHeight = 135;
+const gridRowStep = gridHeight + 6;
+
 function gridCard(story, index) {
   const w = 192;
-  const h = 135;
   const artHeight = 53;
   const x = margin + (index % 5) * 201;
-  const y = 476 + Math.floor(index / 5) * 141;
+  const y = gridTop + Math.floor(index / 5) * gridRowStep;
   const left = x + 7;
   const contents = w - 14;
   const tagStyle = fit(story.tag, w - 24, 1,
     { size: 10.4, bold: true, tracking: 0.65, fill: light, anchor: 'end' }, `${story.id} tag`).style;
   const tagWidth = Math.ceil(estimate(story.tag, tagStyle) + 12);
-  return rect(x + 0.5, y + 0.5, w - 1, h - 1, '#faf6ed', outline(rule))
+  return rect(x + 0.5, y + 0.5, w - 1, gridHeight - 1, '#faf6ed', outline(rule))
     + artPanel(story, x, y, w, 58, artHeight)
     + statusPill(x + w - 5, y + 4, story.status, true)
     + rect(x + w - tagWidth, y + artHeight - 16, tagWidth, 16, ink)
@@ -441,7 +498,7 @@ function gridCard(story, index) {
       { size: 9.2, italic: true, fill: muted }, `${story.id} source`);
 }
 
-const detailsTop = 754;
+const detailsTop = gridTop + gridRowStep + gridHeight + 4;
 const detailsBottom = 929;
 const numbersWidth = 164;
 const detailsHeadingOffset = 16;
@@ -488,7 +545,7 @@ function briefsBand() {
   const columnLength = Math.ceil(also.length / 2);
   const columns = [also.slice(0, columnLength), also.slice(columnLength)];
   const firstBaseline = detailsTop + 32.75;
-  const leading = 11.625;
+  const leading = 11.8;
   const bodyStyle = { size: 11.75 };
   return sectionTitle(left, detailsTop + detailsHeadingOffset, 'ALSO ON SUNDAY 22 NOVEMBER')
     + line(left, detailsTop + detailsRuleOffset, right, detailsTop + detailsRuleOffset)
@@ -544,7 +601,7 @@ const stipple = element('pattern', { id: 'stipple', width: 7, height: 7, pattern
   circle(1, 1, 0.5, ink, { opacity: 0.23 }) + circle(4.5, 4.5, 0.4, light, { opacity: 0.45 }));
 const svg = element('svg', { xmlns: 'http://www.w3.org/2000/svg', width: size, height: size, viewBox: `0 0 ${size} ${size}` },
   [element('title', {}, escape(day.date)), element('defs', {}, stipple), band(size, size, paper),
-    masthead(), timelineBand(), heroes.map(heroCard).join('\n'), grid.map(gridCard).join('\n'),
+    masthead(), regionStrip(), timelineBand(), heroes.map(heroCard).join('\n'), grid.map(gridCard).join('\n'),
     numbersBand(), briefsBand(), line(margin, detailsTop, right, detailsTop, ink, 1.5), footer()].join('\n'));
 
 const build = new URL('./build/', import.meta.url);
@@ -575,3 +632,4 @@ try {
   rmSync(temporary, { recursive: true, force: true });
 }
 if (shrinkLog.length) console.log(`Reduced text sizes:\n${shrinkLog.join('\n')}`);
+console.log(`Region counts: ${regions.map((region) => `${region} ${regionCounts[region]}`).join(', ')} (${storyCount} total)`);
